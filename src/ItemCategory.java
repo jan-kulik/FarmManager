@@ -1,6 +1,7 @@
 public enum ItemCategory {
-    ANIMAL_PRDUCT,
+    ANIMAL_PRODUCT,
     CROP,
     FEED,
-    MATERIAL
+    MATERIAL,
+    FOOD
 }
