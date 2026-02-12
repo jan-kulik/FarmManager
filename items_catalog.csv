@@ -1,0 +1,63 @@
+itemId,displayName,category,itemLimit
+,NULL,NULL,""
+# ===== TIERPRODUKTE =====,NULL,NULL,""
+eier,Eier,ANIMAL_PRODUCT,9999
+milch,Milch,ANIMAL_PRODUCT,9999
+wolle,Wolle,ANIMAL_PRODUCT,9999
+fleisch,Fleisch,ANIMAL_PRODUCT,9999
+huehnerfleisch,Hühnerfleisch,ANIMAL_PRODUCT,9999
+rindfleisch,Rindfleisch,ANIMAL_PRODUCT,9999
+schweinefleisch,Schweinefleisch,ANIMAL_PRODUCT,9999
+leder,Leder,ANIMAL_PRODUCT,9999
+fell,Fell,ANIMAL_PRODUCT,9999
+,NULL,NULL,9999
+# ===== PFLANZEN / ERNTE =====,NULL,NULL,""
+weizen,Weizen,CROP,9999
+mais,Mais,CROP,9999
+gerste,Gerste,CROP,9999
+hafer,Hafer,CROP,9999
+kartoffeln,Kartoffeln,CROP,9999
+karotten,Karotten,CROP,9999
+zwiebeln,Zwiebeln,CROP,9999
+tomaten,Tomaten,CROP,9999
+sojabohnen,Sojabohnen,CROP,9999
+raps,Raps,CROP,9999
+zuckerrueben,Zuckerrüben,CROP,9999
+,NULL,NULL,""
+# ===== FUTTER =====,NULL,NULL,""
+tierfutter,Tierfutter,FEED,9999
+heu,Heu,FEED,9999
+maisschrot,Maisschrot,FEED,9999
+eiweissmix,Proteinmix,FEED,9999
+silage,Silage,FEED,9999
+,NULL,NULL,""
+# ===== VERARBEITETE LEBENSMITTEL ====,NULL,NULL,""
+brot,Brot,FOOD,9999
+kaese,Käse,FOOD,9999
+butter,Butter,FOOD,9999
+mehl,Mehl,FOOD,9999
+maismehl,Maismehl,FOOD,9999
+joghurt,Joghurt,FOOD,9999
+steak,Steak,FOOD,9999
+wurst,Wurst,FOOD,9999
+milchpulver,Milchpulver,FOOD,9999
+nudeln,Nudeln,FOOD,9999
+zucker,Zucker,FOOD,9999
+,NULL,NULL,""
+# ===== MATERIALIEN =====,NULL,NULL,""
+duenger,Dünger,MATERIAL,9999
+weizensamen,Weizensamen,MATERIAL,9999
+maissamen,Maissamen,MATERIAL,9999
+gerstensamen,Gerstensamen,MATERIAL,9999
+rapssamen,Rapssamen,MATERIAL,9999
+verpackung,Verpackungsmaterial,MATERIAL,9999
+diesel,Diesel,MATERIAL,9999
+wasser,Wasser,MATERIAL,9999
+stroh,Stroh,MATERIAL,9999
+,NULL,NULL,""
+# ===== SONSTIGE PRODUKTE =====,NULL,NULL,""
+biogas,Biogas,MATERIAL,9999
+kompost,Kompost,MATERIAL,9999
+honig,Honig,ANIMAL_PRODUCT,9999
+eierlikoer,Eierlikör,FOOD,9999
+apfelsaft,Apfelsaft,FOOD,9999
