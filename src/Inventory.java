@@ -3,27 +3,41 @@ import java.util.*;
 
 public class Inventory {
     private final Map<String, Integer> items;
+    private final Map<String, Integer> itemCaps;
+    private final ItemCatalog catalog;
     private int maxCapacity;
 
-    public Inventory() {
+    public Inventory(ItemCatalog catalog) {
+        this.catalog = catalog;
         this.items = new HashMap<>();
+        this.itemCaps = new HashMap<>();
         this.maxCapacity = -1;
     }
 
-    public boolean createItem(String itemId) {
-        String id = normalizeId(itemId);
-        if (id == null) return false;
 
+
+    public boolean createItem(String itemId, int maxItemCapacity) {
+        String id = normalizeId(itemId);
+        if (id== null) return false;
+
+        if (!catalog.exists(id)) return false;
         if (items.containsKey(id)) return false;
+
+        if (maxItemCapacity< 0) return false;
+
         items.put(id, 0);
+        itemCaps.put(id, maxItemCapacity);
         return true;
     }
+
 
     public boolean deleteItem(String itemId) {
         String id = normalizeId(itemId);
         if (id == null) return false;
 
-        return items.remove(id) != null;
+        boolean existed = items.remove(id) != null;
+        itemCaps.remove(id);
+        return existed;
     }
 
     public boolean itemExists(String itemId) {
@@ -33,6 +47,7 @@ public class Inventory {
         return items.containsKey(id);
     }
 
+
     public boolean addItem(String itemId, int amount) {
         String id = normalizeId(itemId);
         if (id == null) return false;
@@ -40,6 +55,11 @@ public class Inventory {
         if (!items.containsKey(id)) return false;
 
         if(!canAdd(amount)) return false;
+        ItemDefinition def = catalog.get(id);
+        if (def == null) return false;
+        int current = items.get(id);
+        int cap = itemCaps.getOrDefault(id, 0);
+        if (current + amount > cap) return false;
 
         items.put(id, items.get(id) + amount);
         return true;
@@ -75,7 +95,6 @@ public class Inventory {
         return ids;
     }
 
-
     public int getMaxCapacity() {
         return maxCapacity;
     }
@@ -98,6 +117,12 @@ public class Inventory {
         return Math.max(0, maxCapacity - getUsedCapacity());
     }
 
+    public int getMaxItemCapacity(String itemId) {
+        String id = normalizeId(itemId);
+        if (id == null) return 0;
+        return itemCaps.getOrDefault(id, 0);
+    }
+
     private boolean canAdd(int amountToAdd) {
         if (maxCapacity == -1) return true;
         return getUsedCapacity() + amountToAdd <= maxCapacity;
@@ -105,9 +130,9 @@ public class Inventory {
 
     /*
      * Benutztes Format:
-     * itemId, amount
-     * eggs, 120
-     * milk, 50
+     * itemId, amount, maxItemCapacity
+     * eggs, 120, 300
+     * milk, 50, 67
      *
      * immer so weiter
      */
@@ -115,23 +140,28 @@ public class Inventory {
     public void saveInventoryCsv(String path) throws IOException {
         BufferedWriter writer = new BufferedWriter(new FileWriter(path));
 
-        writer.write("itemId,amount");
+        writer.write("itemId,amount,maxItemCapacity");
         writer.newLine();
 
         for (String id : getItemIdsSorted()) {
-            writer.write(id + "," + items.get(id));
+            int amount = items.get(id);
+            int cap = itemCaps.getOrDefault(id, 0);
+            writer.write(id + "," + amount + "," + cap);
             writer.newLine();
         }
 
         writer.close();
     }
 
+
     public void loadInventoryCsv(String path) throws IOException {
         BufferedReader reader = new BufferedReader(new FileReader(path));
         items.clear();
+        itemCaps.clear();
 
         String line;
         boolean firstLine = true;
+
         while ((line = reader.readLine()) != null) {
             line = line.trim();
             if (line.isEmpty()) continue;
@@ -143,22 +173,31 @@ public class Inventory {
             firstLine = false;
 
             String[] parts = line.split(",");
-            if(parts.length < 2) continue;
+            if (parts.length < 4) continue;
+
             String id = normalizeId(parts[0]);
             if (id == null) continue;
 
             int amount;
+            int cap;
+
             try {
                 amount = Integer.parseInt(parts[1].trim());
-            }catch (NumberFormatException ex) {
+                cap = Integer.parseInt(parts[2].trim());
+            } catch (NumberFormatException ex) {
                 continue;
             }
 
             if (amount < 0) amount = 0;
-            items.put(id,amount);
+            if (cap < 0) cap = 0;
+
+            items.put(id, amount);
+            itemCaps.put(id, cap);
         }
+
         reader.close();
     }
+
 
     public void saveConfig(String path) throws IOException {
         BufferedWriter writer = new BufferedWriter(new FileWriter(path));
