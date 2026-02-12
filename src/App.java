@@ -1,13 +1,22 @@
 import java.util.Scanner;
+import java.util.List;
 
 public class App {
 
     public void start() {
         Scanner sc = new Scanner(System.in);
 
-        Inventory inventory = new Inventory();
+        ItemCatalog catalog = new ItemCatalog();
+        try {
+            catalog.loadFromCsv("items_catalog.csv");
+        } catch (Exception e) {
+            System.out.println("Katalog konnte nicht geladen werden. " + e.getMessage());
+        }
+
+        Inventory inventory = new Inventory(catalog);
         InventoryRepository repo = new InventoryRepository("inventory.csv", "inventory_config.txt");
         repo.loadOrCreate(inventory);
+
 
         Menu mainMenu = Menu.main("Hauptmenü", sc);
         Menu inventoryMenu = Menu.sub("Lagerverwaltung", sc);
@@ -15,15 +24,16 @@ public class App {
 
         mainMenu.add(1, "Lagerverwaltung", inventoryMenu::open);
 
-        // Lager \\
+        // ===  Lager === \\
 
         inventoryMenu.add(1, "Lagerbestand anzeigen", () -> {
            System.out.println("Maximale Kapazität: " + (inventory.getMaxCapacity() < 0 ? "unbegrenzt" : inventory.getMaxCapacity()));
-           System.out.println("Benutzte Kapazität: " + inventory.getUsedCapacity());
-           if (inventory.getMaxCapacity() > 0)
+           if (inventory.getMaxCapacity() > 0) {
+               System.out.println("Benutzte Kapazität: " + inventory.getUsedCapacity());
                System.out.println("Freie Kapazität: " + inventory.getFreeCapacity());
+           }
            for (String id : inventory.getItemIdsSorted())
-               System.out.println("-" + id + ": " + inventory.getAmount(id));
+               System.out.println("-" + id.toUpperCase() + ": " + inventory.getAmount(id) + " / " + inventory.getMaxItemCapacity(id));
            System.out.print("Enter drücken, um zum Menü zurückzukehren.");
            sc.nextLine();
         });
@@ -39,11 +49,27 @@ public class App {
         });
 
         inventoryMenu.add(3, "Artikel erstellen", () -> {
-            System.out.print("Artikel-ID: ");
-            String id = sc.nextLine();
-            boolean ok = inventory.createItem(id);
-            System.out.println(ok ? "Artikel erstellt." : "Artikel konnte nicht erstellt werden.");
+            int index = 1;
+            List<ItemDefinition> list = catalog.getAllSorted();
+
+            for (ItemDefinition item : list) {
+                System.out.println(index + ") " + item.getDisplayName());
+                index++;
+            }
+
+            int choice = readInt(sc, "Artikel auswählen: ");
+
+            if (choice < 1 || choice > list.size()) {
+                System.out.println("Wähle eine Zahl.");
+                return;
+            }
+
+            int cap = readInt(sc, "Maximale Kapazität für dieses Item: ");
+            String id = list.get(choice - 1).getItemId();
+            boolean ok = inventory.createItem(id, cap);
             repo.save(inventory);
+
+            System.out.println(ok ? "Artikel erstellt" : "Bereits vorhanden oder ungültig.");
         });
 
         inventoryMenu.add(4, "Artikel entfernen", () -> {
@@ -77,6 +103,7 @@ public class App {
         System.out.println("Programm beendet.");
         sc.close();
     }
+
 
     private int readInt(Scanner sc, String prompt) {
         while (true) {
