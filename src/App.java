@@ -32,8 +32,10 @@ public class App {
                System.out.println("Benutzte Kapazität: " + inventory.getUsedCapacity());
                System.out.println("Freie Kapazität: " + inventory.getFreeCapacity());
            }
-           for (String id : inventory.getItemIdsSorted())
-               System.out.println("-" + id.toUpperCase() + ": " + inventory.getAmount(id) + " / " + inventory.getMaxItemCapacity(id));
+           for (String id : inventory.getItemIdsSorted()) {
+               String idCapitalized = id.substring(0, 1).toUpperCase() + id.substring(1);
+               System.out.println("- " + idCapitalized + ": " + inventory.getAmount(id) + " / " + inventory.getMaxItemCapacity(id));
+           }
            System.out.print("Enter drücken, um zum Menü zurückzukehren.");
            sc.nextLine();
         });
@@ -67,9 +69,9 @@ public class App {
             int cap = readInt(sc, "Maximale Kapazität für dieses Item: ");
             String id = list.get(choice - 1).getItemId();
             boolean ok = inventory.createItem(id, cap);
-            repo.save(inventory);
 
             System.out.println(ok ? "Artikel erstellt" : "Bereits vorhanden oder ungültig.");
+            repo.save(inventory);
         });
 
         inventoryMenu.add(4, "Artikel entfernen", () -> {
