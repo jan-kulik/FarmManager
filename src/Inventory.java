@@ -173,7 +173,7 @@ public class Inventory {
             firstLine = false;
 
             String[] parts = line.split(",");
-            if (parts.length < 4) continue;
+            if (parts.length < 3) continue;
 
             String id = normalizeId(parts[0]);
             if (id == null) continue;

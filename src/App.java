@@ -17,7 +17,6 @@ public class App {
         InventoryRepository repo = new InventoryRepository("inventory.csv", "inventory_config.txt");
         repo.loadOrCreate(inventory);
 
-
         Menu mainMenu = Menu.main("Hauptmenü", sc);
         Menu inventoryMenu = Menu.sub("Lagerverwaltung", sc);
         Menu inventoryConfigMenu = Menu.sub("Lagerkonfiguration", sc);
