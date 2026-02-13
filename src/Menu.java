@@ -1,12 +1,14 @@
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.function.Supplier;
 
 public class Menu {
 
     private final String title;
     private final Scanner sc;
     private final boolean isMainMenu;
+    private Supplier<String> statusLine;
 
     private final Map<Integer, MenuItem> items = new LinkedHashMap<>();
 
@@ -26,6 +28,10 @@ public class Menu {
 
     public void add(int number, String text, Runnable action) {
         items.put(number, new MenuItem(text, action, false));
+    }
+
+    public void setStatusLine(Supplier<String> statusLine) {
+        this.statusLine = statusLine;
     }
 
     public void open() {
@@ -51,6 +57,9 @@ public class Menu {
 
     private void print() {
         System.out.println("=== " + title + " ===");
+        if (statusLine != null) {
+            System.out.println(statusLine.get());
+        }
         for (Map.Entry<Integer, MenuItem> e : items.entrySet()) {
             System.out.println(e.getKey() + ") " + e.getValue().text());
         }
