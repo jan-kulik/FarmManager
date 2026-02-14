@@ -17,7 +17,9 @@ public class App {
         DataStore dataStore = new DataStore("data.txt");
         InventoryRepository repo = new InventoryRepository("inventory.csv", dataStore);
         if (!dataStore.hasKey("balance") || !dataStore.hasKey("maxCapacity")) {
+            System.out.println("Keine vorherigen Daten gefunden.");
             System.out.println("Ersteinrichtung:");
+            System.out.println(" ");
             double startBalance = readDouble(sc, "Start-Geld: ");
             int maxCapacity = readInt(sc, "Maximale Kapazität (-1 für unbegrenzt): ");
 
