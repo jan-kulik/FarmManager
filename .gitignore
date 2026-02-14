@@ -35,3 +35,4 @@ bin/
 # inventory and config
 inventory.csv
 inventory_config.txt
+data.txt
