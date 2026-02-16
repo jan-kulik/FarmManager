@@ -2,13 +2,13 @@ public class ItemDefinition {
     private final String itemId;
     private final String displayName;
     private final ItemCategory category;
-    private final int basePrice;
+    private final double basePrice;
 
-    public ItemDefinition(String itemId, String displayName, ItemCategory category, int basePrice) {
+    public ItemDefinition(String itemId, String displayName, ItemCategory category, double basePrice) {
         this.itemId = itemId;
         this.displayName = displayName;
         this.category = category;
-        this.basePrice = Math.max(0, basePrice);
+        this.basePrice = Math.max(0.0, basePrice);
     }
 
     public String getItemId() {
@@ -23,7 +23,7 @@ public class ItemDefinition {
         return category;
     }
 
-    public int getBasePrice() {
+    public double getBasePrice() {
         return basePrice;
     }
 }

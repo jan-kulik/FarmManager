@@ -36,16 +36,16 @@ public class ItemCatalog {
                 continue;
             }
 
-            int itemLimit;
+            double basePrice;
             try {
-                itemLimit = Integer.parseInt(parts[3].trim());
+                basePrice = Double.parseDouble(parts[3].trim());
             } catch (NumberFormatException ex) {
                 continue;
             }
 
-            if (itemLimit < 0) itemLimit = 0;
+            if (basePrice < 0.0) basePrice = 0.0;
 
-            definitions.put(itemId, new ItemDefinition(itemId, displayName, category, itemLimit));
+            definitions.put(itemId, new ItemDefinition(itemId, displayName, category, basePrice));
         }
 
         reader.close();
