@@ -30,7 +30,7 @@ public class Chicken extends Animal {
 
     @Override
     public String getProductItemId() {
-        return "eier";
+        return "eggs";
     }
 
     @Override
