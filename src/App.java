@@ -36,6 +36,7 @@ public class App {
 
         Menu mainMenu = Menu.main("Hauptmenü", sc);
         Menu settingsAndConfigMenu = Menu.sub("Einstellungen & Konfiguration", sc);
+        Menu animalMenu = Menu.sub("Tiere", sc);
 
         mainMenu.setStatusLine(() -> "Kontostand: " + balance.getBalance());
         mainMenu.add(1, "Lagerbestand anzeigen", () -> {
@@ -51,7 +52,24 @@ public class App {
             System.out.print("Enter drücken, um zum Menü zurückzukehren.");
             sc.nextLine();
         });
+        mainMenu.add(2, "Tiere anzeigen", animalMenu::open);
         mainMenu.add(9, "Einstellungen & Konfiguration", settingsAndConfigMenu::open);
+
+        // ===  Tiere === \\
+
+        // animalMenu.setStatusLine(() -> "Anzahl Tiere: " + animalService.getAnimals().size());
+        // animalMenu.add(1, "Alle Tiere anzeigen", () -> {
+        //     List<Animal> animals = animalService.getAnimals();
+        //     if (animals.isEmpty()) {
+        //         System.out.println("Keine Tiere vorhanden.");
+        //     } else {
+        //         for (Animal a : animals) {
+        //             System.out.println("- " + a.getName() + " (" + a.getType() + ", ID: " + a.getId() + ")");
+        //         }
+        //     }
+        //     System.out.print("Enter drücken, um zum Menü zurückzukehren.");
+        //     sc.nextLine();
+        // });
 
         // ===  Einstellungen & Konfiguration === \\
 
