@@ -29,6 +29,9 @@ public class App {
         repo.loadOrCreate(inventory);
         Balance balance = new Balance(dataStore);
 
+        AnimalRepository animalRepo = new AnimalRepository("animals.csv", dataStore);
+        AnimalService animalService = new AnimalService(animalRepo);
+
         // ===  Menüs === \\
 
         Menu mainMenu = Menu.main("Hauptmenü", sc);
