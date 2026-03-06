@@ -1,3 +1,7 @@
 public enum AnimalType {
-    CHICKEN
+    CHICKEN,
+    COW,
+    PIG,
+    SHEEP,
+    BEE
 }
