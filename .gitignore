@@ -36,4 +36,6 @@ bin/
 inventory.csv
 inventory_config.txt
 data.txt
-animals.csv
+
+#Diagramme
+Diagramme.puml
