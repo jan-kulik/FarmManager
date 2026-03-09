@@ -14,11 +14,6 @@ public class Cow extends Animal {
     }
 
     @Override
-    public double getDailyFeedCost() {
-        return 1.5;
-    }
-
-    @Override
     public int getDailyHungerLoss() {
         return 10;
     }
@@ -42,4 +37,20 @@ public class Cow extends Animal {
     public int getProductionIntervalDays() {
         return 1;
     }
+
+    @Override
+    public String[] getAllowedFeedItems() {
+        return new String[]{ "hay", "silage", "animal_feed" };
+    }
+
+    @Override
+    public int getFeedHungerValue(String itemId) {
+        switch (itemId) {
+            case "hay": return 30;
+            case "silage": return 35;
+            case "animal_feed": return 20;
+            default: return 25;
+        }
+    }
+
 }
