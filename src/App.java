@@ -36,7 +36,6 @@ public class App {
 
         Menu mainMenu = Menu.main("Hauptmenü", sc);
         Menu settingsAndConfigMenu = Menu.sub("Einstellungen & Konfiguration", sc);
-        Menu animalMenu = Menu.sub("Tiere", sc);
 
         mainMenu.setStatusLine(() -> "Kontostand: " + balance.getBalance());
         mainMenu.add(1, "Lagerbestand anzeigen", () -> {
@@ -52,33 +51,21 @@ public class App {
             System.out.print("Enter drücken, um zum Menü zurückzukehren.");
             sc.nextLine();
         });
-        mainMenu.add(2, "Tiere anzeigen", animalMenu::open);
+        mainMenu.add(2, "Tiere anzeigen", () -> animalService.openBrowser(sc, inventory, repo));
         mainMenu.add(9, "Einstellungen & Konfiguration", settingsAndConfigMenu::open);
 
-        // ===  Tiere === \\
-
-        // animalMenu.setStatusLine(() -> "Anzahl Tiere: " + animalService.getAnimals().size());
-        // animalMenu.add(1, "Alle Tiere anzeigen", () -> {
-        //     List<Animal> animals = animalService.getAnimals();
-        //     if (animals.isEmpty()) {
-        //         System.out.println("Keine Tiere vorhanden.");
-        //     } else {
-        //         for (Animal a : animals) {
-        //             System.out.println("- " + a.getName() + " (" + a.getType() + ", ID: " + a.getId() + ")");
-        //         }
-        //     }
-        //     System.out.print("Enter drücken, um zum Menü zurückzukehren.");
-        //     sc.nextLine();
-        // });
 
         // ===  Einstellungen & Konfiguration === \\
 
         Menu moneySettingMenu = Menu.sub("Geldkonfiguration", sc);
         Menu inventorySettingsMenu = Menu.sub("Lagerkonfiguration", sc);
+        Menu animalSettingsMenu = Menu.sub("Tierkonfiguration", sc);
 
         settingsAndConfigMenu.add(1, "Geldkonfiguration", moneySettingMenu::open);
         settingsAndConfigMenu.add(2, "Lagerkonfiguration", inventorySettingsMenu::open);
+        settingsAndConfigMenu.add(3, "Tierkonfiguration", animalSettingsMenu::open);
 
+        // Geldkonfiguration
         moneySettingMenu.setStatusLine(() -> "Kontostand: " + balance.getBalance());
         moneySettingMenu.add(1, "Kontostand festlegen", () -> {
             double newBalance = readDouble(sc, "Neuer Kontostand: ");
@@ -96,6 +83,7 @@ public class App {
             System.out.println(ok ? "Geld abgehoben." : "Nicht genügend Geld auf dem Konto.");
         });
 
+        // Lagerkonfiguration
         inventorySettingsMenu.add(1, "Artikel hinzufügen", () -> {
             System.out.print("Artikel-ID: ");
             String id = sc.nextLine();
@@ -105,7 +93,6 @@ public class App {
             System.out.println(ok ? "Artikel hinzugefügt." : "Artikel konnte nicht hinzugefügt werden.");
             repo.save(inventory);
         });
-
         inventorySettingsMenu.add(2, "Artikel erstellen", () -> {
             int index = 1;
             List<ItemDefinition> list = catalog.getAllSorted();
@@ -129,7 +116,6 @@ public class App {
             System.out.println(ok ? "Artikel erstellt" : "Bereits vorhanden oder ungültig.");
             repo.save(inventory);
         });
-
         inventorySettingsMenu.add(3, "Artikel entfernen", () -> {
             System.out.print("Artikel-ID: ");
             String id = sc.nextLine();
@@ -146,12 +132,48 @@ public class App {
             System.out.println(ok ? "Artikel entfernt." : "Artikel konnte nicht entfernt werden.");
             repo.save(inventory);
         });
-
         inventorySettingsMenu.add(5, "Maximale Kapazität festlegen", () -> {
             int maxCapacity = readInt(sc, "Maximale Kapazität (-1 für unbegrenzt): ");
             inventory.setMaxCapacity(maxCapacity);
             repo.save(inventory);
             System.out.println("Maximale Kapazität aktualisiert.");
+        });
+
+        // Tierkonfiguration
+        animalSettingsMenu.add(1, "Tier hinzufügen", () -> {
+            AnimalType[] types = AnimalType.values();
+            for (int i = 0; i < types.length; i++) {
+                System.out.println((i + 1) + ") " + types[i]);
+            }
+            int choice = readInt(sc, "Tierart wählen: ");
+            if (choice < 1 || choice > types.length) {
+                System.out.println("Ungültige Auswahl.");
+                return;
+            }
+            System.out.print("Name des Tieres: ");
+            String name = sc.nextLine().trim();
+            if (name.isEmpty()) {
+                System.out.println("Name darf nicht leer sein.");
+                return;
+            }
+            Animal created = animalService.create(types[choice - 1], name);
+            System.out.println("Tier hinzugefügt: " + created.getName() + " (ID: " + created.getId() + ")");
+        });
+        animalSettingsMenu.add(2, "Tier füttern", () -> {
+            List<Animal> animals = animalService.getAnimals();
+            if (animals.isEmpty()) {
+                System.out.println("Keine Tiere vorhanden.");
+                return;
+            }
+            int id = readInt(sc, "Tier-ID: ");
+            int amount = readInt(sc, "Futtermenge: ");
+            boolean ok = animalService.feed(id, amount);
+            System.out.println(ok ? "Tier gefüttert." : "Tier nicht gefunden.");
+        });
+        animalSettingsMenu.add(3, "Tier entfernen", () -> {
+            int id = readInt(sc, "Tier-ID: ");
+            boolean ok = animalService.deleteById(id);
+            System.out.println(ok ? "Tier entfernt." : "Tier nicht gefunden.");
         });
 
 
