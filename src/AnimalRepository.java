@@ -108,9 +108,21 @@ public class AnimalRepository {
     }
 
     private Animal createFromType(AnimalType type, int id, String name, int ageDays, int hunger, int counter) {
+        return createFromType(type, id, name, ageDays, hunger, counter, -1);
+    }
+
+    private Animal createFromType(AnimalType type, int id, String name, int ageDays, int hunger, int counter, int extra) {
         switch (type) {
             case CHICKEN:
                 return new Chicken(id, name, ageDays, hunger, counter);
+            case COW:
+                return new Cow(id, name, ageDays, hunger, counter);
+            case PIG:
+                return new Pig(id, name, ageDays,   hunger, counter);
+            case SHEEP:
+                return new Sheep(id, name, ageDays, hunger, counter);
+            case BEE:
+                return new Bee(id, name, ageDays, hunger, counter);
             default:
                 return null;
         }
