@@ -14,11 +14,6 @@ public class Pig extends Animal {
     }
 
     @Override
-    public double getDailyFeedCost() {
-        return 1.5;
-    }
-
-    @Override
     public int getDailyHungerLoss() {
         return 5;
     }
@@ -42,4 +37,20 @@ public class Pig extends Animal {
     public int getProductionIntervalDays() {
         return 2;
     }
+
+    @Override
+    public String[] getAllowedFeedItems() {
+        return new String[]{ "corn_meal", "protein_mix", "animal_feed" };
+    }
+
+    @Override
+    public int getFeedHungerValue(String itemId) {
+        switch (itemId) {
+            case "corn_meal": return 25;
+            case "protein_mix": return 40;
+            case "animal_feed": return 20;
+            default: return 25;
+        }
+    }
+
 }
