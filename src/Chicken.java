@@ -14,11 +14,6 @@ public class Chicken extends Animal {
     }
 
     @Override
-    public double getDailyFeedCost() {
-        return 1.5;
-    }
-
-    @Override
     public int getDailyHungerLoss() {
         return 10;
     }
@@ -42,4 +37,19 @@ public class Chicken extends Animal {
     public int getProductionIntervalDays() {
         return 1;
     }
+
+    @Override
+    public String[] getAllowedFeedItems() {
+        return new String[]{ "corn_meal", "animal_feed" };
+    }
+
+    @Override
+    public int getFeedHungerValue(String itemId) {
+        switch (itemId) {
+            case "corn_meal": return 30;
+            case "animal_feed": return 25;
+            default: return 25;
+        }
+    }
+
 }
