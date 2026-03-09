@@ -45,18 +45,35 @@ public abstract class Animal {
         hunger = clamp(hunger + amount, 0, 100);
     }
 
-    public final void endOfDay(Inventory inventory, Balance balance) {
+    public boolean feedWithItem(String itemId, Inventory inventory) {
+        String[] allowed = getAllowedFeedItems();
+        boolean isAllowed = false;
+        for (String s : allowed) {
+            if (s.equals(itemId)) { isAllowed = true; break; }
+        }
+        if (!isAllowed) return false;
+        if (!inventory.hasEnough(itemId, 1)) return false;
+        inventory.removeItem(itemId, 1);
+        hunger = clamp(hunger + getFeedHungerValue(itemId), 0, 100);
+        return true;
+    }
+
+    public int getFeedHungerValue(String itemId) {
+        return 25;
+    }
+
+    public abstract String[] getAllowedFeedItems();
+
+    public boolean needsFeeding() {
+        return true;
+    }
+
+    public final void endOfDay(Inventory inventory) {
         ageDays++;
 
         int loss = getDailyHungerLoss();
         if (loss < 0) loss = 0;
         hunger = clamp(hunger - loss, 0, 100);
-
-        double cost = getDailyFeedCost();
-        if (cost < 0) cost = 0;
-        if (cost > 0) {
-            balance.withdraw(cost);
-        }
 
         productionCounterDays++;
 
@@ -80,8 +97,6 @@ public abstract class Animal {
 
     public abstract AnimalType getType();
 
-    public abstract double getDailyFeedCost();
-
     public abstract int getDailyHungerLoss();
 
     public abstract int getMinHungerToProduce();
@@ -97,4 +112,17 @@ public abstract class Animal {
         if (v > max) return max;
         return v;
     }
+
+    // Erstellt eine Textdarstellung des Hungerbalkens, z.B. [#####.....] für 50% Hunger
+    public static String hungerBar(int hunger) {
+        int filled = hunger / 10;
+        StringBuilder bar = new StringBuilder("[");
+        for (int i = 0; i < 10; i++) {
+            bar.append(i < filled ? "#" : ".");
+        }
+        bar.append("]");
+        return bar.toString();
+    }
+
+
 }
