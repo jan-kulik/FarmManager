@@ -123,6 +123,7 @@ public class Inventory {
         return itemCaps.getOrDefault(id, 0);
     }
 
+    // Gibt den "displayName" aus dem Katalog zuruck
     public String getDisplayName(String itemId) {
         String id = normalizeId(itemId);
         if (id == null) return null;
@@ -130,6 +131,7 @@ public class Inventory {
         return (def != null) ? def.getDisplayName(): id;
     }
 
+    // Prüft, ob die Menge hinzugefügt werden kann(Kpazität des Lagers und vom Item)
     private boolean canAdd(int amountToAdd) {
         if (maxCapacity == -1) return true;
         return getUsedCapacity() + amountToAdd <= maxCapacity;
