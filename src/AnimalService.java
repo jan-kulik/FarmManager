@@ -20,14 +20,6 @@ public class AnimalService {
         this.catalog = catalog;
     }
 
-    private String getDisplayName(String itemId) {
-        if (catalog != null) {
-            ItemDefinition def = catalog.get(itemId);
-            if (def != null) return def.getDisplayName();
-        }
-        return itemId;
-    }
-
     public List<Animal> getAnimals() {
         return animals;
     }
