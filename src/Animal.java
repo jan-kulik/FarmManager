@@ -123,6 +123,4 @@ public abstract class Animal {
         bar.append("]");
         return bar.toString();
     }
-
-
 }
