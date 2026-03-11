@@ -52,5 +52,4 @@ public class Cow extends Animal {
             default: return 25;
         }
     }
-
 }
