@@ -82,7 +82,7 @@ public class Crops {
             } else {
                 for (int i = 0; i < crops.size(); i++) {
                     CropEntry c = crops.get(i);
-                    String name = getDisplayName(c.getSeedItemId());
+                    String name = inventory.getDisplayName(c.getSeedItemId());
                     String status = c.isReady()
                             ? "ERNTEREIF"
                             : ("Tag " + c.getGrowthDays() + "/" + c.getGrowthDaysNeeded());
@@ -115,10 +115,10 @@ public class Crops {
             int seedAmount = inventory.getAmount(type[0]);
             if (seedAmount > 0) {
                 available.add(type);
-                System.out.println(available.size() + ") " + getDisplayName(type[0])
+                System.out.println(available.size() + ") " + inventory.getDisplayName(type[0])
                         + "  |  Samen: " + seedAmount
                         + "  |  Wächst in " + type[2] + " Tagen"
-                        + "  |  Ergibt: " + type[3] + "x " + getDisplayName(type[1]) + " pro Samen");
+                        + "  |  Ergibt: " + type[3] + "x " + inventory.getDisplayName(type[1]) + " pro Samen");
             }
         }
 
@@ -161,7 +161,7 @@ public class Crops {
         sortById();
         repository.save(crops);
 
-        System.out.println(amount + "x " + getDisplayName(chosen[0]) + " gepflanzt. (Feld-ID: " + id + ")");
+        System.out.println(amount + "x " + inventory.getDisplayName(chosen[0]) + " gepflanzt. (Feld-ID: " + id + ")");
     }
 
     private void openHarvestMenu(Scanner sc, Inventory inventory, InventoryRepository repo) {
@@ -181,8 +181,8 @@ public class Crops {
             int harvestPerSeed = getHarvestAmount(c.getSeedItemId());
             int total = c.getAmount() * harvestPerSeed;
             System.out.println((i + 1) + ") [ID:" + c.getId() + "]  "
-                    + c.getAmount() + "x " + getDisplayName(c.getSeedItemId())
-                    + "  →  Ernte: " + total + "x " + getDisplayName(c.getHarvestItemId()));
+                    + c.getAmount() + "x " + inventory.getDisplayName(c.getSeedItemId())
+                    + "  →  Ernte: " + total + "x " + inventory.getDisplayName(c.getHarvestItemId()));
         }
 
         System.out.println("0) Abbrechen");
@@ -202,7 +202,7 @@ public class Crops {
             System.out.println("Lager voll oder Artikel nicht im Lager. Ernte: " + total + "x " + c.getHarvestItemId());
         } else {
             repo.save(inventory);
-            System.out.println("Geerntet: " + total + "x " + getDisplayName(c.getHarvestItemId()));
+            System.out.println("Geerntet: " + total + "x " + inventory.getDisplayName(c.getHarvestItemId()));
         }
 
         crops.remove(c);
@@ -210,14 +210,6 @@ public class Crops {
     }
 
     // Hilfsfunktionen
-
-    private String getDisplayName(String itemId) {
-        if (catalog != null) {
-            ItemDefinition def = catalog.get(itemId);
-            if (def != null) return def.getDisplayName();
-        }
-        return itemId;
-    }
 
     private int getHarvestAmount(String seedItemId) {
         for (String[] type : CROP_TYPES) {
