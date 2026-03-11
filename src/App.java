@@ -32,7 +32,11 @@ public class App {
         AnimalRepository animalRepo = new AnimalRepository("animals.csv", dataStore);
         AnimalService animalService = new AnimalService(animalRepo);
 
-        // ===  Menüs === \\
+        CropRepository cropRepo = new CropRepository("crops.csv", dataStore);
+        Crops crops = new Crops(cropRepo);
+        crops.setCatalog(catalog);
+
+        // === Menüs === \\
 
         Menu mainMenu = Menu.main("Hauptmenü", sc);
         Menu settingsAndConfigMenu = Menu.sub("Einstellungen & Konfiguration", sc);
@@ -52,6 +56,7 @@ public class App {
             sc.nextLine();
         });
         mainMenu.add(2, "Tiere anzeigen", () -> animalService.openBrowser(sc, inventory, repo));
+        mainMenu.add(3, "Felder & Ackerbau", () -> crops.openBrowser(sc, inventory, repo));
         mainMenu.add(9, "Einstellungen & Konfiguration", settingsAndConfigMenu::open);
 
 
