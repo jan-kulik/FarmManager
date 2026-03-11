@@ -36,12 +36,16 @@ public class App {
         Crops crops = new Crops(cropRepo);
         crops.setCatalog(catalog);
 
+        MarketRepository marketRepo = new MarketRepository("market.csv");
+        Market market = new Market(marketRepo, catalog);
+
         // === Menüs === \\
 
         Menu mainMenu = Menu.main("Hauptmenü", sc);
         Menu settingsAndConfigMenu = Menu.sub("Einstellungen & Konfiguration", sc);
 
-        mainMenu.setStatusLine(() -> "Kontostand: " + balance.getBalance());
+        mainMenu.setStatusLine(() -> "Kontostand: " + String.format("%.2f", balance.getBalance()) + " €");
+
         mainMenu.add(1, "Lagerbestand anzeigen", () -> {
             System.out.println("Maximale Kapazität: " + (inventory.getMaxCapacity() < 0 ? "unbegrenzt" : inventory.getMaxCapacity()));
             if (inventory.getMaxCapacity() > 0) {
@@ -54,8 +58,43 @@ public class App {
             System.out.print("Enter drücken, um zum Menü zurückzukehren.");
             sc.nextLine();
         });
-        mainMenu.add(2, "Tiere anzeigen", () -> animalService.openBrowser(sc, inventory, repo));
-        mainMenu.add(3, "Felder & Ackerbau", () -> crops.openBrowser(sc, inventory, repo));
+
+        mainMenu.add(2, "Markt (Kaufen / Verkaufen)", () -> market.openMenu(sc, inventory, balance, repo));
+
+        mainMenu.add(3, "Tiere anzeigen", () -> animalService.openBrowser(sc, inventory, repo));
+
+        mainMenu.add(4, "Felder & Ackerbau", () -> crops.openBrowser(sc, inventory, repo));
+
+        mainMenu.add(5, "Tag beenden", () -> {
+            int day = dataStore.getInt("currentDay", 1);
+
+            System.out.println("=== Tagesabschluss – Tag " + day + " ===");
+            System.out.println(" ");
+
+            // Tiere produzieren
+            animalService.endDayAll(inventory);
+            System.out.println("Tiere haben produziert");
+
+            // Felder wachsen
+            crops.endDayAll();
+            System.out.println("Felder sind um einen Tag gewachsen.");
+
+            // Marktpreise aktualisieren
+            market.endOfDay(inventory);
+            System.out.println("Marktpreise wurden aktualisiert.");
+
+            // Lager speichern
+            repo.save(inventory);
+
+            // Tageszähler erhöhen
+            dataStore.setInt("currentDay", day + 1);
+
+            System.out.println(" ");
+            System.out.println("Tag " + day + " abgeschlossen. Willkommen an Tag " + (day + 1) + "!");
+            System.out.print("Enter drücken, um zum Menü zurückzukehren.");
+            sc.nextLine();
+        });
+
         mainMenu.add(9, "Einstellungen & Konfiguration", settingsAndConfigMenu::open);
 
 
@@ -70,7 +109,7 @@ public class App {
         settingsAndConfigMenu.add(3, "Tierkonfiguration", animalSettingsMenu::open);
 
         // Geldkonfiguration
-        moneySettingMenu.setStatusLine(() -> "Kontostand: " + balance.getBalance());
+        moneySettingMenu.setStatusLine(() -> "Kontostand: " + String.format("%.2f", balance.getBalance()) + " €");
         moneySettingMenu.add(1, "Kontostand festlegen", () -> {
             double newBalance = readDouble(sc, "Neuer Kontostand: ");
             balance.setBalance(newBalance);
