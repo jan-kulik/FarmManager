@@ -244,7 +244,7 @@ public class AnimalService {
         }
     }
 
-    // Das Fütterungsmenü zeigt nur die erlaubten Futter an, die auch im Lager verfügbar sind.
+    // Das Fütterungsmenü zeigt nur die erlaubten Futter an, die im Lager sind.
     private void openFeedMenu(Scanner sc, Animal animal, Inventory inventory, InventoryRepository repo) {
         String[] allowed = animal.getAllowedFeedItems();
         if (allowed.length == 0) {
@@ -259,7 +259,7 @@ public class AnimalService {
         for (int i = 0; i < allowed.length; i++) {
             int amount = inventory.getAmount(allowed[i]);
             if (amount > 0) {
-                String displayName = getDisplayName(allowed[i]);
+                String displayName = inventory.getDisplayName(allowed[i]);
                 System.out.println((count + 1) + ") " + displayName
                         + "  +" + animal.getFeedHungerValue(allowed[i]) + " Hunger"
                         + "  Vorrat: " + amount);
@@ -271,7 +271,7 @@ public class AnimalService {
         if (count == 0) {
             System.out.println("Kein passendes Futter im Lager vorhanden.");
             System.out.print("Erlaubte Futtermittel:");
-            for (String s : allowed) System.out.print("  " + getDisplayName(s));
+            for (String a : allowed) System.out.print("  " + inventory.getDisplayName(a));
             System.out.println();
             return;
         }
@@ -290,7 +290,7 @@ public class AnimalService {
             repo.save(inventory);
             save();
             System.out.println(animal.getName() + " gefüttert mit "
-                    + getDisplayName(available[choice - 1])
+                    + inventory.getDisplayName(available[choice - 1])
                     + ". Hunger jetzt: " + animal.getHunger());
         } else {
             System.out.println("Füttern fehlgeschlagen.");
