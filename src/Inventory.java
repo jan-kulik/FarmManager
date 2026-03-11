@@ -123,6 +123,13 @@ public class Inventory {
         return itemCaps.getOrDefault(id, 0);
     }
 
+    public String getDisplayName(String itemId) {
+        String id = normalizeId(itemId);
+        if (id == null) return null;
+        ItemDefinition def = catalog.get(id);
+        return (def == null) ? def.getDisplayName(): id;
+    }
+
     private boolean canAdd(int amountToAdd) {
         if (maxCapacity == -1) return true;
         return getUsedCapacity() + amountToAdd <= maxCapacity;
