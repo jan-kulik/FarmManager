@@ -127,7 +127,7 @@ public class Inventory {
         String id = normalizeId(itemId);
         if (id == null) return null;
         ItemDefinition def = catalog.get(id);
-        return (def == null) ? def.getDisplayName(): id;
+        return (def != null) ? def.getDisplayName(): id;
     }
 
     private boolean canAdd(int amountToAdd) {
