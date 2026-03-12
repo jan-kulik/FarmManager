@@ -1,4 +1,12 @@
+import java.util.Random;
+
 public class Sheep extends Animal {
+
+    // productionCounterDays aus Animal wird als "daysSinceShearing" wiederverwendet.
+    // Kein eigenes Feld nötig, kein eigenes toCsvRow nötig.
+
+    private static final int SHEARING_INTERVAL = 182;
+    private static final Random random = new Random();
 
     public Sheep(int id, String name) {
         super(id, name, 0, 100, 0);
@@ -23,6 +31,7 @@ public class Sheep extends Animal {
         return 40;
     }
 
+    // Automatische Produktion deaktiviert – Schafe werden manuell geschoren.
     @Override
     public String getProductItemId() {
         return "wool";
@@ -30,12 +39,12 @@ public class Sheep extends Animal {
 
     @Override
     public int getProductAmount() {
-        return 3;
+        return 0;
     }
 
     @Override
     public int getProductionIntervalDays() {
-        return 182;
+        return Integer.MAX_VALUE;
     }
 
     @Override
@@ -52,4 +61,28 @@ public class Sheep extends Animal {
         }
     }
 
+    /** productionCounterDays wird hier als Tage-seit-Schur verwendet. */
+    public boolean canBeSheared() {
+        return getProductionCounterDays() >= SHEARING_INTERVAL;
+    }
+
+    public int getDaysUntilShearing() {
+        return Math.max(0, SHEARING_INTERVAL - getProductionCounterDays());
+    }
+
+    /**
+     * Schert das Schaf manuell. Legt 2–5 Wolle ins Lager.
+     * Setzt productionCounterDays auf 0 zurück.
+     */
+    public boolean shear(Inventory inventory) {
+        if (!canBeSheared()) return false;
+        if (getHunger() < getMinHungerToProduce()) return false;
+
+        int amount = 2 + random.nextInt(4); // 2, 3, 4 oder 5
+        boolean added = inventory.addItem("wool", amount);
+        if (!added) return false;
+
+        resetProductionCounter();
+        return true;
+    }
 }
