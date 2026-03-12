@@ -59,7 +59,8 @@ public class App {
             sc.nextLine();
         });
 
-        mainMenu.add(2, "Markt (Kaufen / Verkaufen)", () -> market.openMenu(sc, inventory, balance, repo));
+        // animalService wird jetzt an den Markt weitergegeben
+        mainMenu.add(2, "Markt (Kaufen / Verkaufen)", () -> market.openMenu(sc, inventory, balance, repo, animalService));
 
         mainMenu.add(3, "Tiere anzeigen", () -> animalService.openBrowser(sc, inventory, repo));
 
@@ -79,9 +80,10 @@ public class App {
             crops.endDayAll();
             System.out.println("Felder sind um einen Tag gewachsen.");
 
-            // Marktpreise aktualisieren
+            // Marktpreise aktualisieren + Tierangebot neu generieren
             market.endOfDay(inventory);
             System.out.println("Marktpreise wurden aktualisiert.");
+            System.out.println("Tiershop hat neues Angebot.");
 
             // Lager speichern
             repo.save(inventory);
