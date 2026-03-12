@@ -100,11 +100,11 @@ public class AnimalService {
     private void sortById() {
         animals.sort(Comparator.comparingInt(Animal::getId));
     }
+
     // === Tier-Menü === \\
 
     private static final int PAGE_SIZE = 15;
 
-    // Menu dartstellung aller Tiere
     public void openBrowser(Scanner sc, Inventory inventory, InventoryRepository repo) {
         int page = 0;
         while (true) {
@@ -135,6 +135,13 @@ public class AnimalService {
                 String extra;
                 if (a instanceof Bee) {
                     extra = "Volk: " + ((Bee) a).getColonySize() + " Bienen";
+                } else if (a instanceof Sheep) {
+                    Sheep sheep = (Sheep) a;
+                    String shearStatus = sheep.canBeSheared()
+                            ? "SCHERBEREIT"
+                            : ("Schur in " + sheep.getDaysUntilShearing() + " Tagen");
+                    extra = "Hunger: " + Animal.hungerBar(a.getHunger())
+                            + " (" + a.getHunger() + ")  |  " + shearStatus;
                 } else {
                     extra = "Hunger: " + Animal.hungerBar(a.getHunger()) + " (" + a.getHunger() + ")";
                 }
@@ -172,23 +179,38 @@ public class AnimalService {
         }
     }
 
-    // Ist ein Tier ausgewählt, öffnet dieses Menü mit Details und Aktionen (Füttern, Umbenennen, Löschen).
     private void openDetail(Scanner sc, Animal animal, Inventory inventory, InventoryRepository repo) {
         while (true) {
             System.out.println(" ");
             System.out.println("=== " + animal.getName() + " (" + animal.getType() + ") ===");
             System.out.println("ID: " + animal.getId()
                     + "  |  Alter: " + animal.getAgeDays() + " Tage");
+
             if (animal instanceof Bee) {
                 System.out.println("Volk: " + ((Bee) animal).getColonySize() + " Bienen");
                 System.out.println("Honig-Produktion: alle 30 Tage automatisch");
+            } else if (animal instanceof Sheep) {
+                Sheep sheep = (Sheep) animal;
+                System.out.println("Hunger: " + Animal.hungerBar(animal.getHunger())
+                        + " (" + animal.getHunger() + "/100)");
+                if (sheep.canBeSheared()) {
+                    System.out.println("Wolle: SCHERBEREIT  (ergibt 2–5 Wolle)");
+                } else {
+                    System.out.println("Wolle: Schur möglich in " + sheep.getDaysUntilShearing()
+                            + " Tagen  (Tag " + sheep.getProductionCounterDays() + "/182)");
+                }
             } else {
                 System.out.println("Hunger: " + Animal.hungerBar(animal.getHunger())
                         + " (" + animal.getHunger() + "/100)");
             }
+
             System.out.println(" ");
+
             if (animal instanceof Bee) {
                 System.out.println("1) Volksgröße ändern");
+            } else if (animal instanceof Sheep) {
+                System.out.println("1) Füttern");
+                System.out.println("4) Scheren");
             } else {
                 System.out.println("1) Füttern");
             }
@@ -199,6 +221,7 @@ public class AnimalService {
             String input = sc.nextLine().trim();
 
             if (input.equals("0")) return;
+
             if (input.equals("1")) {
                 if (animal instanceof Bee) {
                     System.out.print("Neue Volksgröße: ");
@@ -230,13 +253,32 @@ public class AnimalService {
                     return;
                 }
                 System.out.println("Löschen abgebrochen.");
+            } else if (input.equals("4") && animal instanceof Sheep) {
+                Sheep sheep = (Sheep) animal;
+                if (!sheep.canBeSheared()) {
+                    System.out.println("Noch nicht scherbereit – noch "
+                            + sheep.getDaysUntilShearing() + " Tage warten.");
+                } else if (sheep.getHunger() < sheep.getMinHungerToProduce()) {
+                    System.out.println("Das Schaf ist zu hungrig (Hunger < 40). Erst füttern!");
+                } else {
+                    int vorher = inventory.getAmount("wool");
+                    boolean ok = sheep.shear(inventory);
+                    if (ok) {
+                        int erhalten = inventory.getAmount("wool") - vorher;
+                        repo.save(inventory);
+                        save();
+                        System.out.println(animal.getName() + " wurde geschoren!  +"
+                                + erhalten + "x Wolle ins Lager.");
+                    } else {
+                        System.out.println("Scheren fehlgeschlagen – Lager voll?");
+                    }
+                }
             } else {
                 System.out.println("Ungültige Auswahl.");
             }
         }
     }
 
-    // Das Fütterungsmenü zeigt nur die erlaubten Futter an, die im Lager sind.
     private void openFeedMenu(Scanner sc, Animal animal, Inventory inventory, InventoryRepository repo) {
         String[] allowed = animal.getAllowedFeedItems();
         if (allowed.length == 0) {
