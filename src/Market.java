@@ -9,6 +9,8 @@ import java.util.*;
  *   5) Preis ist auf ±50% des Basispreises begrenzt
  *
  * Beim Kauf: Item wird ggf automatisch im Lager angelegt (Standardkapazität 1000).
+ *
+ * Tiershop: Täglich wechselndes Angebot an zufälligen Tieren zum Kauf.
  */
 public class Market {
 
@@ -24,38 +26,71 @@ public class Market {
     // Standard-Kapazität, wenn ein Item beim Kauf neu angelegt wird
     private static final int DEFAULT_ITEM_CAPACITY = 1000;
 
+    // Tiershop-Konstanten
+
+    // Basispreise pro Tierart
+    private static final Map<AnimalType, Double> ANIMAL_BASE_PRICES = new LinkedHashMap<>();
+    static {
+        ANIMAL_BASE_PRICES.put(AnimalType.CHICKEN,  15.0);
+        ANIMAL_BASE_PRICES.put(AnimalType.COW,     2150.0);
+        ANIMAL_BASE_PRICES.put(AnimalType.PIG,     215.0);
+        ANIMAL_BASE_PRICES.put(AnimalType.SHEEP,    210.0);
+        ANIMAL_BASE_PRICES.put(AnimalType.BEE,      295.0);
+    }
+
+    // Zufällige Tiernamen
+    private static final String[] ANIMAL_NAMES = {
+            "Max", "Bruno", "Hansi", "Fritz", "Karl", "Benny", "Otto", "Moritz",
+            "Gustav", "Heinrich", "Berta", "Hilde", "Emma", "Klara", "Rosa",
+            "Grete", "Liesel", "Anna", "Mathilde", "Frieda", "Emil", "Willi"
+    };
+
+    // Internes Datenobjekt für ein Tier im Shop-Angebot
+    private static class ShopAnimalEntry {
+        final AnimalType type;
+        final String name;
+        final double price;
+
+        ShopAnimalEntry(AnimalType type, String name, double price) {
+            this.type  = type;
+            this.name  = name;
+            this.price = price;
+        }
+    }
+
     private final MarketRepository    repository;
     private final ItemCatalog         catalog;
     private final Map<String, MarketEntry> entries;
+    private final Random              random = new Random();
+
+    // Aktuelles Tierangebot im Shop
+    private final List<ShopAnimalEntry> animalOffer = new ArrayList<>();
 
     public Market(MarketRepository repository, ItemCatalog catalog) {
         this.repository = repository;
         this.catalog    = catalog;
         this.entries    = new LinkedHashMap<>();
         this.repository.loadOrCreate(this.entries);
+        generateAnimalOffer();
     }
 
     // Preisberechnung
 
-    //Gibt den aktuellen Preis zurück(geglättet)
     public double getBuyPrice(String itemId, Inventory inventory) {
         return getSmoothedPrice(itemId, inventory);
     }
 
-    // Verkaufspreis ist 80% des Kaufpreises
     public double getSellPrice(String itemId, Inventory inventory) {
         return getSmoothedPrice(itemId, inventory) * 0.80;
     }
 
-    // Holt den geglätteten Preis für ein Item, berechnet ihn ggf. neu
     private double getSmoothedPrice(String itemId, Inventory inventory) {
         MarketEntry entry = getOrCreate(itemId);
         return entry.getSmoothedPrice();
     }
 
-    // Kaufen (Spieler kauft vom Markt = Lager füllt sich)
+    // Kaufen / Verkaufen (Waren)
 
-    // Kauft eine Menge eines Items vom Markt. Gibt den Gesamtpreis zurück oder -1 bei Fehler.
     public double buyFromMarket(String itemId, int amount,
                                 Inventory inventory, Balance balance) {
         if (amount <= 0) return -1;
@@ -63,7 +98,6 @@ public class Market {
         ItemDefinition def = catalog.get(itemId);
         if (def == null) return -1;
 
-        // Item wenn nicht existent neu anlegen (Standardkapazität)
         if (!inventory.itemExists(itemId)) {
             inventory.createItem(itemId, DEFAULT_ITEM_CAPACITY);
         }
@@ -75,12 +109,10 @@ public class Market {
 
         boolean added = inventory.addItem(itemId, amount);
         if (!added) {
-            // Kauf zurückabwickeln, falls das lager voll ist
             balance.deposit(total);
             return -1;
         }
 
-        // Nachfrage anpassen = Bei kauf senken
         MarketEntry entry = getOrCreate(itemId);
         entry.recordBuy(amount);
         double newDemand = entry.getDemandFactor() - DEMAND_SHIFT_PER_ITEM * amount;
@@ -90,10 +122,6 @@ public class Market {
         return total;
     }
 
-
-    // Verkaufen (Spieler verkauft an Markt = Lager leert sich)
-
-   // Verkauft eine Menge eines Items an den Markt
     public double sellToMarket(String itemId, int amount,
                                Inventory inventory, Balance balance) {
         if (amount <= 0) return -1;
@@ -107,7 +135,6 @@ public class Market {
 
         balance.deposit(total);
 
-        // Nachfrage anpassen = Verkaufen erhöht Nachfrage
         MarketEntry entry = getOrCreate(itemId);
         entry.recordSell(amount);
         double newDemand = entry.getDemandFactor() + DEMAND_SHIFT_PER_ITEM * amount;
@@ -117,10 +144,8 @@ public class Market {
         return total;
     }
 
-
     // Tagesabschluss
 
-    // Berechnet die neuen Preise basierend auf Nachfrage und Lagerbestand, wird am Ende eines Tages aufgerufen
     public void endOfDay(Inventory inventory) {
         List<ItemDefinition> allItems = catalog.getAllSorted();
 
@@ -131,39 +156,56 @@ public class Market {
 
             MarketEntry entry = getOrCreate(itemId);
 
-            // Angebotsfaktor: volle Lager = niedriger Preis, leeres Lager = hoher Preis
             double angebotsFaktor = calcAngebotsFaktor(itemId, inventory);
-
-            // Basepreis, Nachfrage und Angebot = Rohpreis
             double rawPrice = base * entry.getDemandFactor() * angebotsFaktor;
 
-            // Begrenzung des Basispreises aus Zeile 16
             double minPrice = base * (1.0 - MAX_DEVIATION);
             double maxPrice = base * (1.0 + MAX_DEVIATION);
             rawPrice = Math.max(minPrice, Math.min(maxPrice, rawPrice));
 
-            // smoothedPrice bewegt sich langsam Richtung rawPrice
             double oldSmoothed = entry.getSmoothedPrice();
             double newSmoothed = oldSmoothed + SMOOTH_FACTOR * (rawPrice - oldSmoothed);
             entry.setSmoothedPrice(newSmoothed);
 
-            // Nachfrage langsam Richtung Basis
             double demand = entry.getDemandFactor();
             demand = demand + 0.05 * (1.0 - demand);
             entry.setDemandFactor(demand);
 
-            // Tageswerte zurücksetzen
             entry.resetDailyCounters();
         }
 
         repository.save(entries);
+
+        // Tierangebot täglich neu generieren
+        generateAnimalOffer();
     }
 
+    // Tiershop – Angebot generieren
+
+    /**
+     * Generiert ein neues zufälliges Tierangebot (3–6 Tiere).
+     * Preise schwanken ±20% um den Basispreis.
+     */
+    private void generateAnimalOffer() {
+        animalOffer.clear();
+        int count = 3 + random.nextInt(4); // 3 bis 6 Tiere
+        AnimalType[] types = AnimalType.values();
+
+        for (int i = 0; i < count; i++) {
+            AnimalType type = types[random.nextInt(types.length)];
+            String name     = ANIMAL_NAMES[random.nextInt(ANIMAL_NAMES.length)];
+            double base     = ANIMAL_BASE_PRICES.getOrDefault(type, 100.0);
+            double factor   = 0.80 + random.nextDouble() * 0.40; // ±20%
+            double price    = Math.round(base * factor * 100.0) / 100.0;
+
+            animalOffer.add(new ShopAnimalEntry(type, name, price));
+        }
+    }
 
     // Menü
 
     public void openMenu(Scanner sc, Inventory inventory, Balance balance,
-                         InventoryRepository invRepo) {
+                         InventoryRepository invRepo, AnimalService animalService) {
         while (true) {
             System.out.println("=== Markt ===");
             System.out.println("Kontostand: " + String.format("%.2f", balance.getBalance()) + " €");
@@ -171,6 +213,7 @@ public class Market {
             System.out.println("1) Verkaufen");
             System.out.println("2) Kaufen");
             System.out.println("3) Preisübersicht");
+            System.out.println("4) Tiere kaufen");
             System.out.println("0) Zurück");
             System.out.print("Auswahl: ");
 
@@ -181,14 +224,91 @@ public class Market {
             else if (input.equals("1")) openSellMenu(sc, inventory, balance, invRepo);
             else if (input.equals("2")) openBuyMenu(sc, inventory, balance, invRepo);
             else if (input.equals("3")) showPriceOverview(inventory);
+            else if (input.equals("4")) openAnimalShopMenu(sc, balance, animalService);
             else System.out.println("Ungültige Auswahl.");
         }
     }
 
-    // Verkaufsmenü
+    // Tiershop-Menü
+
+    private void openAnimalShopMenu(Scanner sc, Balance balance, AnimalService animalService) {
+        while (true) {
+            System.out.println("=== Tiere kaufen ===");
+            System.out.println("Kontostand: " + String.format("%.2f", balance.getBalance()) + " €");
+            System.out.println("(Das Angebot wechselt täglich)");
+            System.out.println();
+
+            if (animalOffer.isEmpty()) {
+                System.out.println("Heute sind keine Tiere verfügbar. Komm morgen wieder!");
+                System.out.println();
+                System.out.println("0) Zurück");
+                System.out.print("Auswahl: ");
+                sc.nextLine();
+                return;
+            }
+
+            System.out.printf("  %-4s %-12s %-20s %s%n", "#", "Tierart", "Name", "Preis");
+            System.out.println("  " + "-".repeat(52));
+            for (int i = 0; i < animalOffer.size(); i++) {
+                ShopAnimalEntry e = animalOffer.get(i);
+                System.out.printf("  %2d) %-12s %-20s %8.2f €%n",
+                        i + 1,
+                        e.type.name(),
+                        e.name,
+                        e.price);
+            }
+
+            System.out.println();
+            System.out.println("0) Zurück");
+            System.out.print("Auswahl: ");
+            String input = sc.nextLine().trim();
+
+            if (input.equals("0")) return;
+
+            int choice;
+            try {
+                choice = Integer.parseInt(input);
+            } catch (NumberFormatException e) {
+                System.out.println("Bitte eine Zahl eingeben.");
+                continue;
+            }
+
+            if (choice < 1 || choice > animalOffer.size()) {
+                System.out.println("Ungültige Auswahl.");
+                continue;
+            }
+
+            ShopAnimalEntry chosen = animalOffer.get(choice - 1);
+
+            System.out.printf("Kaufen: %s (%s) für %.2f €? (ja/nein): ",
+                    chosen.name, chosen.type.name(), chosen.price);
+            String confirm = sc.nextLine().trim();
+
+            if (!confirm.equalsIgnoreCase("ja")) {
+                System.out.println("Kauf abgebrochen.");
+                continue;
+            }
+
+            if (!balance.withdraw(chosen.price)) {
+                System.out.println("Nicht genug Geld auf dem Konto.");
+                continue;
+            }
+
+            Animal bought = animalService.create(chosen.type, chosen.name);
+            animalOffer.remove(choice - 1); // Tier aus Angebot entfernen
+
+            System.out.printf("Gekauft: %s (%s, ID: %d)  −%.2f €%n",
+                    bought.getName(), bought.getType().name(),
+                    bought.getId(), chosen.price);
+            System.out.printf("Neuer Kontostand: %.2f €%n", balance.getBalance());
+            System.out.println();
+        }
+    }
+
+    // Warenmenüs
+
     private void openSellMenu(Scanner sc, Inventory inventory, Balance balance,
                               InventoryRepository invRepo) {
-        // Nur Items im Lager anzeigen
         List<String> available = new ArrayList<>();
         for (String id : inventory.getItemIdsSorted()) {
             if (inventory.getAmount(id) > 0) {
@@ -205,9 +325,9 @@ public class Market {
         System.out.println("  #  Name                       Bestand   Preis/Stk");
         System.out.println("  ---------------------------------------------------");
         for (int i = 0; i < available.size(); i++) {
-            String id          = available.get(i);
-            String name        = inventory.getDisplayName(id);
-            int    amount      = inventory.getAmount(id);
+            String id           = available.get(i);
+            String name         = inventory.getDisplayName(id);
+            int    amount       = inventory.getAmount(id);
             double pricePerUnit = getSellPrice(id, inventory);
             System.out.printf("  %2d) %-26s %5d     %6.2f €%n",
                     i + 1, name, amount, pricePerUnit);
@@ -242,7 +362,6 @@ public class Market {
         }
     }
 
-    // Kaufmenü
     private void openBuyMenu(Scanner sc, Inventory inventory, Balance balance,
                              InventoryRepository invRepo) {
         List<ItemDefinition> allItems = catalog.getAllSorted();
@@ -287,7 +406,6 @@ public class Market {
         }
     }
 
-    // Preisübersicht
     private void showPriceOverview(Inventory inventory) {
         System.out.println("=== Preisübersicht ===");
         System.out.printf("  %-26s  %8s  %8s  %8s  %8s%n",
@@ -303,7 +421,6 @@ public class Market {
             MarketEntry entry = getOrCreate(id);
             double demand    = entry.getDemandFactor();
 
-            // Trend-Pfeil: steigend, fallend, neutral
             String trend;
             if (demand > 1.05)       trend = "↑";
             else if (demand < 0.95)  trend = "↓";
@@ -317,7 +434,6 @@ public class Market {
 
     // Hilfsmethoden
 
-    // Gibt bestehenden Eintrag zurück oder erstellt einen neuen mit Basispreis.
     private MarketEntry getOrCreate(String itemId) {
         if (!entries.containsKey(itemId)) {
             ItemDefinition def = catalog.get(itemId);
@@ -327,19 +443,13 @@ public class Market {
         return entries.get(itemId);
     }
 
-    /**
-     * Berechnet den Angebotsfaktor abhängig vom Lagerstand.
-     * Voller Lager = Faktor < 1 (sinkender Preis)
-     * Leeres Lager = Faktor > 1 (steigender Preis)
-     */
     private double calcAngebotsFaktor(String itemId, Inventory inventory) {
         int current = inventory.getAmount(itemId);
         int cap     = inventory.getMaxItemCapacity(itemId);
 
-        if (cap <= 0) return 1.0; // Keine Kapazitätsdaten = neutral
+        if (cap <= 0) return 1.0;
 
         double ratio = (double) current / cap;
-        // ratio=0 = 1.3 (teurer), ratio=1 = 0.7 (günstiger)
         return 1.3 - 0.6 * ratio;
     }
 
