@@ -96,5 +96,6 @@ public class CropRepository {
 
     private void setNextCropId(int next) {
         dataStore.setInt("nextCropId", Math.max(1, next));
+        dataStore.saveNow();
     }
 }

@@ -33,5 +33,6 @@ public class Balance {
 
     private void save() {
         dataStore.setDouble("balance", balance);
+        dataStore.saveNow();
     }
 }

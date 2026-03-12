@@ -32,6 +32,7 @@ public class App {
 
             dataStore.setDouble("balance", startBalance);
             dataStore.setInt("maxCapacity", maxCapacity);
+            dataStore.saveNow();
         }
         repo.loadOrCreate(inventory);
         Balance balance = new Balance(dataStore);
@@ -104,6 +105,8 @@ public class App {
 
             // Tageszähler erhöhen
             dataStore.setInt("currentDay", day + 1);
+
+            dataStore.saveNow();
 
             System.out.println(" ");
             System.out.println("Tag " + (day + 1) + "!");

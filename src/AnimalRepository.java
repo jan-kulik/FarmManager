@@ -107,6 +107,7 @@ public class AnimalRepository {
 
     private void setNextAnimalId(int next) {
         dataStore.setInt("nextAnimalId", Math.max(1, next));
+        dataStore.saveNow();
     }
 
     private Animal createFromType(AnimalType type, int id, String name, int ageDays, int hunger, int counter) {

@@ -25,6 +25,7 @@ public class InventoryRepository {
 
     public void save(Inventory inventory) {
         dataStore.setInt("maxCapacity", inventory.getMaxCapacity());
+        dataStore.saveNow();
         saveCsv(inventory);
     }
 
