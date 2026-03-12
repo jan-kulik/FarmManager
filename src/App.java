@@ -85,6 +85,15 @@ public class App {
             // Felder wachsen
             crops.endDayAll();
 
+            // Zeigt eine Warnung an, wenn Felder erntereif sind
+            int reif = 0;
+            for (Crops.CropEntry c : crops.getCrops()) {
+                if (c.isReady()) reif++;
+            }
+            if (reif > 0) {
+                System.out.println("> " + reif + " Felder sind erntereif!");
+            }
+
             // Marktpreise aktualisieren + Tierangebot neu generieren
             market.endOfDay(inventory);
             System.out.println("Marktpreise wurden aktualisiert.");
