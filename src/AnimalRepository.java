@@ -110,10 +110,6 @@ public class AnimalRepository {
         dataStore.saveNow();
     }
 
-    private Animal createFromType(AnimalType type, int id, String name, int ageDays, int hunger, int counter) {
-        return createFromType(type, id, name, ageDays, hunger, counter, -1);
-    }
-
     private Animal createFromType(AnimalType type, int id, String name, int ageDays, int hunger, int counter, int extra) {
         switch (type) {
             case CHICKEN:
