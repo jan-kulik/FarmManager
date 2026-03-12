@@ -165,8 +165,7 @@ public class App {
             if (inventory.getAmount(id) > 0) {
                 System.out.println("Der Artikel ist noch im Lager. Sicher das du ihn löschen möchtest?");
                 System.out.println("Ja oder Nein?");
-                if (sc.nextLine().trim().equalsIgnoreCase("ja")) {
-                } else {
+                if (!sc.nextLine().trim().equalsIgnoreCase("ja")) {
                     System.out.println("Löschen abgebrochen.");
                     return;
                 }

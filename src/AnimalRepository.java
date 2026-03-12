@@ -61,7 +61,9 @@ public class AnimalRepository {
                     continue;
                 }
 
-                Animal animal = createFromType(type, id, name, ageDays, hunger, counter);
+                // Bienen
+                int extra = (parts.length >= 7) ? parseIntSafe(parts[6].trim(), -1) : -1;
+                Animal animal = createFromType(type, id, name, ageDays, hunger, counter, extra);
                 if (animal != null) {
                     animals.add(animal);
                 }
@@ -122,9 +124,17 @@ public class AnimalRepository {
             case SHEEP:
                 return new Sheep(id, name, ageDays, hunger, counter);
             case BEE:
-                return new Bee(id, name, ageDays, hunger, counter);
+                return extra > 0
+                    ? new Bee(id, name, ageDays, hunger, counter, extra)
+                    : new Bee(id, name, ageDays, hunger, counter);
+
             default:
                 return null;
         }
+    }
+
+    private int parseIntSafe(String s, int fallback) {
+        try { return Integer.parseInt(s); }
+        catch (NumberFormatException e) { return fallback; }
     }
 }
