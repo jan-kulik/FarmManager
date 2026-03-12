@@ -74,16 +74,14 @@ public class App {
 
             // Tiere produzieren
             animalService.endDayAll(inventory);
-            System.out.println("Tiere haben produziert");
 
             // Felder wachsen
             crops.endDayAll();
-            System.out.println("Felder sind um einen Tag gewachsen.");
 
             // Marktpreise aktualisieren + Tierangebot neu generieren
             market.endOfDay(inventory);
             System.out.println("Marktpreise wurden aktualisiert.");
-            System.out.println("Tiershop hat neues Angebot.");
+            System.out.println("Der Tiershop hat neues Angebot.");
 
             // Lager speichern
             repo.save(inventory);
@@ -92,7 +90,7 @@ public class App {
             dataStore.setInt("currentDay", day + 1);
 
             System.out.println(" ");
-            System.out.println("Tag " + day + " abgeschlossen. Willkommen an Tag " + (day + 1) + "!");
+            System.out.println("Tag " + (day + 1) + "!");
             System.out.print("Enter drücken, um zum Menü zurückzukehren.");
             sc.nextLine();
         });
