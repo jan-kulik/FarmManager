@@ -60,7 +60,7 @@ public class App {
         });
 
         // animalService wird jetzt an den Markt weitergegeben
-        mainMenu.add(2, "Markt (Kaufen / Verkaufen)", () -> market.openMenu(sc, inventory, balance, repo, animalService));
+        mainMenu.add(2, "Markt", () -> market.openMenu(sc, inventory, balance, repo, animalService));
 
         mainMenu.add(3, "Tiere anzeigen", () -> animalService.openBrowser(sc, inventory, repo));
 
