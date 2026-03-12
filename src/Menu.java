@@ -27,7 +27,7 @@ public class Menu {
     }
 
     public void add(int number, String text, Runnable action) {
-        items.put(number, new MenuItem(text, action, false));
+        items.put(number, new MenuItem(text, action));
     }
 
     public void setStatusLine(Supplier<String> statusLine) {
