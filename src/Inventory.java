@@ -207,40 +207,6 @@ public class Inventory {
         reader.close();
     }
 
-
-    public void saveConfig(String path) throws IOException {
-        BufferedWriter writer = new BufferedWriter(new FileWriter(path));
-        writer.write("maxCapacity=" + maxCapacity);
-        writer.newLine();
-        writer.close();
-    }
-
-    public void loadConfig(String path) throws IOException {
-        BufferedReader reader = new BufferedReader(new FileReader(path));
-        String line;
-        while ((line = reader.readLine()) != null) {
-            line = line.trim();
-            if (line.isEmpty()) continue;
-            if (line.startsWith("#")) continue;
-
-            String[] parts = line.split("=");
-            if (parts.length < 2) continue;
-
-            String key = parts[0].trim();
-            String value = parts[1].trim();
-
-            if (key.equalsIgnoreCase("maxCapacity")) {
-                try {
-                    int cap = Integer.parseInt(value);
-                    setMaxCapacity(cap);
-                } catch (NumberFormatException ignored) {
-                }
-            }
-        }
-
-        reader.close();
-    }
-
     private String normalizeId(String itemId) {
         if (itemId == null) return null;
 
