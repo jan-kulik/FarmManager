@@ -116,6 +116,10 @@ public abstract class Animal {
         return v;
     }
 
+    protected void resetProductionCounter() {
+        this.productionCounterDays = 0;
+    }
+
     // Erstellt eine Textdarstellung des Hungerbalkens, z.B. [#####.....] für 50% Hunger
     public static String hungerBar(int hunger) {
         int filled = hunger / 10;
