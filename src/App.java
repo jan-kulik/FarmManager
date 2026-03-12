@@ -9,8 +9,15 @@ public class App {
         ItemCatalog catalog = new ItemCatalog();
         try {
             catalog.loadFromCsv("items_catalog.csv");
+            if (catalog.getAllSorted().isEmpty()) {
+                System.out.println("FEHLER: Katalog ist leer oder wurde nicht gefunden.");
+                System.out.println("Bitte 'items_catalog.csv' im Projektordner ablegen.");
+                return;
+            }
         } catch (Exception e) {
-            System.out.println("Katalog konnte nicht geladen werden. " + e.getMessage());
+            System.out.println("FEHLER: Katalog konnte nicht geladen werden: " + e.getMessage());
+            System.out.println("Bitte 'items_catalog.csv' im Projektordner ablegen.");
+            return;
         }
 
         Inventory inventory = new Inventory(catalog);
