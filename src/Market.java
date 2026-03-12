@@ -284,7 +284,7 @@ public class Market {
                     chosen.name, chosen.type.name(), chosen.price);
             String confirm = sc.nextLine().trim();
 
-            if (!confirm.equalsIgnoreCase("ja")) {
+            if (!confirm.equalsIgnoreCase("ja") && !confirm.equalsIgnoreCase("j")) {
                 System.out.println("Kauf abgebrochen.");
                 continue;
             }
