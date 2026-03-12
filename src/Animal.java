@@ -84,7 +84,10 @@ public abstract class Animal {
             String productId = getProductItemId();
             int amount = getProductAmount();
             if (productId != null && !productId.isBlank() && amount > 0) {
-                inventory.addItem(productId, amount);
+                boolean produced = inventory.addItem(productId, amount);
+                if (!produced) {
+                    System.out.println(getName() + " konnte nicht produzieren (Lager voll?)");
+                }
             }
             productionCounterDays = 0;
         }
