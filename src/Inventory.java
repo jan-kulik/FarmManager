@@ -123,6 +123,14 @@ public class Inventory {
         return itemCaps.getOrDefault(id, 0);
     }
 
+    public String getUnit(String itemId) {
+        String id = normalizeId(itemId);
+        if (id == null) return "";
+        ItemDefinition def = catalog.get(id);
+        if (def == null) return "";
+        return def.getUnit();
+    }
+
     // Gibt den "displayName" aus dem Katalog zuruck
     public String getDisplayName(String itemId) {
         String id = normalizeId(itemId);

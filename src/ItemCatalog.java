@@ -21,7 +21,7 @@ public class ItemCatalog {
             }
 
             String[] parts = line.split(",");
-            if (parts.length<4) continue;
+            if (parts.length < 4) continue;
 
             String itemId = normalizeId(parts[0]);
             if (itemId == null) continue;
@@ -45,7 +45,9 @@ public class ItemCatalog {
 
             if (basePrice < 0.0) basePrice = 0.0;
 
-            definitions.put(itemId, new ItemDefinition(itemId, displayName, category, basePrice));
+            String unit = (parts.length >= 5) ? parts[4].trim() : "";
+
+            definitions.put(itemId, new ItemDefinition(itemId, displayName, category, basePrice, unit));
         }
 
         reader.close();
@@ -53,7 +55,7 @@ public class ItemCatalog {
 
     public boolean exists(String itemId) {
         String id = normalizeId(itemId);
-        if (id ==null) return false;
+        if (id == null) return false;
         return definitions.containsKey(id);
     }
 
@@ -64,7 +66,7 @@ public class ItemCatalog {
     }
 
     public List<ItemDefinition> getAllSorted() {
-        List<ItemDefinition> list= new ArrayList<>(definitions.values());
+        List<ItemDefinition> list = new ArrayList<>(definitions.values());
         list.sort(Comparator.comparing(ItemDefinition::getItemId));
         return list;
     }
@@ -78,7 +80,7 @@ public class ItemCatalog {
             char c = id.charAt(i);
             boolean ok = (c >= 'a' && c <= 'z')
                     || (c >= '0' && c <= '9')
-                      || c == '_' || c == '-';
+                    || c == '_' || c == '-';
             if (!ok) return null;
         }
         return id;

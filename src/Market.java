@@ -295,7 +295,7 @@ public class Market {
             }
 
             Animal bought = animalService.create(chosen.type, chosen.name);
-            animalOffer.remove(choice - 1); // Tier aus Angebot entfernen
+            animalOffer.remove(choice - 1);
 
             System.out.printf("Gekauft: %s (%s, ID: %d)  −%.2f €%n",
                     bought.getName(), bought.getType().name(),
@@ -322,15 +322,16 @@ public class Market {
         }
 
         System.out.println("=== Verkaufen ===");
-        System.out.println("  #  Name                       Bestand   Preis/Stk");
-        System.out.println("  ---------------------------------------------------");
+        System.out.printf("  %-2s  %-26s  %-6s  %-8s  %s%n", "#", "Name", "Einheit", "Bestand", "Preis/Stk");
+        System.out.println("  " + "-".repeat(58));
         for (int i = 0; i < available.size(); i++) {
             String id           = available.get(i);
             String name         = inventory.getDisplayName(id);
+            String unit         = inventory.getUnit(id);
             int    amount       = inventory.getAmount(id);
             double pricePerUnit = getSellPrice(id, inventory);
-            System.out.printf("  %2d) %-26s %5d     %6.2f €%n",
-                    i + 1, name, amount, pricePerUnit);
+            System.out.printf("  %2d) %-26s  %-6s  %5d     %6.2f €%n",
+                    i + 1, name, unit, amount, pricePerUnit);
         }
 
         System.out.println("0) Abbrechen");
@@ -344,7 +345,8 @@ public class Market {
 
         String chosenId = available.get(choice - 1);
         int maxAmount   = inventory.getAmount(chosenId);
-        System.out.print("Menge (max " + maxAmount + "): ");
+        String unit     = inventory.getUnit(chosenId);
+        System.out.print("Menge in " + unit + " (max " + maxAmount + "): ");
         int amount = readInt(sc);
         if (amount <= 0 || amount > maxAmount) {
             System.out.println("Ungültige Menge.");
@@ -356,8 +358,8 @@ public class Market {
             System.out.println("Verkauf fehlgeschlagen.");
         } else {
             invRepo.save(inventory);
-            System.out.printf("Verkauft: %dx %s  →  +%.2f €%n",
-                    amount, inventory.getDisplayName(chosenId), earned);
+            System.out.printf("Verkauft: %d %s %s  →  +%.2f €%n",
+                    amount, unit, inventory.getDisplayName(chosenId), earned);
             System.out.printf("Neuer Kontostand: %.2f €%n", balance.getBalance());
         }
     }
@@ -367,15 +369,16 @@ public class Market {
         List<ItemDefinition> allItems = catalog.getAllSorted();
 
         System.out.println("=== Kaufen ===");
-        System.out.println("  #  Name                       Kaufpreis   Im Lager");
-        System.out.println("  -----------------------------------------------------");
+        System.out.printf("  %-2s  %-26s  %-6s  %-10s  %s%n", "#", "Name", "Einheit", "Kaufpreis", "Im Lager");
+        System.out.println("  " + "-".repeat(62));
         for (int i = 0; i < allItems.size(); i++) {
             ItemDefinition def  = allItems.get(i);
             String         id   = def.getItemId();
+            String         unit = def.getUnit();
             double price        = getBuyPrice(id, inventory);
             int    inStock      = inventory.getAmount(id);
-            System.out.printf("  %2d) %-26s %8.2f €   %5d%n",
-                    i + 1, def.getDisplayName(), price, inStock);
+            System.out.printf("  %2d) %-26s  %-6s  %8.2f €   %5d%n",
+                    i + 1, def.getDisplayName(), unit, price, inStock);
         }
 
         System.out.println("0) Abbrechen");
@@ -388,7 +391,8 @@ public class Market {
         }
 
         ItemDefinition chosen = allItems.get(choice - 1);
-        System.out.print("Menge: ");
+        String unit = chosen.getUnit();
+        System.out.print("Menge in " + unit + ": ");
         int amount = readInt(sc);
         if (amount <= 0) {
             System.out.println("Ungültige Menge.");
@@ -400,21 +404,22 @@ public class Market {
             System.out.println("Kauf fehlgeschlagen. (Zu wenig Geld oder Lager voll?)");
         } else {
             invRepo.save(inventory);
-            System.out.printf("Gekauft: %dx %s  →  -%.2f €%n",
-                    amount, chosen.getDisplayName(), total);
+            System.out.printf("Gekauft: %d %s %s  →  -%.2f €%n",
+                    amount, unit, chosen.getDisplayName(), total);
             System.out.printf("Neuer Kontostand: %.2f €%n", balance.getBalance());
         }
     }
 
     private void showPriceOverview(Inventory inventory) {
         System.out.println("=== Preisübersicht ===");
-        System.out.printf("  %-26s  %8s  %8s  %8s  %8s%n",
-                "Name", "Basis", "Kaufen", "Verkaufen", "Nachfrage");
-        System.out.println("  " + "-".repeat(70));
+        System.out.printf("  %-26s  %-6s  %8s  %8s  %9s  %8s%n",
+                "Name", "Einheit", "Basis", "Kaufen", "Verkaufen", "Nachfrage");
+        System.out.println("  " + "-".repeat(78));
 
         List<ItemDefinition> allItems = catalog.getAllSorted();
         for (ItemDefinition def : allItems) {
             String id        = def.getItemId();
+            String unit      = def.getUnit();
             double base      = def.getBasePrice();
             double buy       = getBuyPrice(id, inventory);
             double sell      = getSellPrice(id, inventory);
@@ -426,8 +431,8 @@ public class Market {
             else if (demand < 0.95)  trend = "↓";
             else                     trend = "–";
 
-            System.out.printf("  %-26s  %7.2f€  %7.2f€  %8.2f€  %6.2f %s%n",
-                    def.getDisplayName(), base, buy, sell, demand, trend);
+            System.out.printf("  %-26s  %-6s  %7.2f€  %7.2f€  %8.2f€  %6.2f %s%n",
+                    def.getDisplayName(), unit, base, buy, sell, demand, trend);
         }
         System.out.println();
     }
