@@ -45,6 +45,9 @@ public class DataStore {
         if(key == null || key.isBlank()) return;
         if(value == null) value = "";
         data.put(key.trim(), value.trim());
+    }
+
+    public void saveNow() {
         save();
     }
 
