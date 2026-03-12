@@ -29,6 +29,7 @@ bin/
 ### Mac OS ###
 .DS_Store
 
+# IntelliJ IDEA project files
 .idea/
 *.iml
 
@@ -38,6 +39,7 @@ inventory_config.txt
 data.txt
 animals.csv
 crops.csv
+market.csv
 
 #Diagramme
 Diagramme.puml
