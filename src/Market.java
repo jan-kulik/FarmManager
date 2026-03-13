@@ -2,14 +2,12 @@ import java.util.*;
 
 /**
  * Preisberechnung:
- *   1) Rohpreis = Basispreis * demandFactor * angebotsFaktor
+ *   1) Rohpreis = Basispreis * demandFactor * angebotsFaktor * 7% (Kaufen) 9 (Verkaufen) MwSt
  *   2) angebotsFaktor: sinkt wenn Lager voll ist, steigt wenn Lager leer ist
  *   3) demandFactor: steigt beim Verkaufen (+0.05 pro Item), sinkt beim Kaufen (-0.05)
  *   4) Preisglätte: smoothedPrice bewegt sich langsam Richtung Rohpreis (30% je Tag)
  *   5) Preis ist auf ±50% des Basispreises begrenzt
- *
- * Beim Kauf: Item wird ggf automatisch im Lager angelegt (Standardkapazität 1000).
- *
+ * beim Kauf: Item wird ggf automatisch im Lager angelegt (Standardkapazität 1000).
  * Tiershop: Täglich wechselndes Angebot an zufälligen Tieren zum Kauf.
  */
 public class Market {
@@ -77,11 +75,11 @@ public class Market {
     // Preisberechnung
 
     public double getBuyPrice(String itemId, Inventory inventory) {
-        return getSmoothedPrice(itemId, inventory);
+        return getSmoothedPrice(itemId, inventory) * 1.07;
     }
 
     public double getSellPrice(String itemId, Inventory inventory) {
-        return getSmoothedPrice(itemId, inventory) * 0.80;
+        return getSmoothedPrice(itemId, inventory) * 0.80 * 1.09;
     }
 
     private double getSmoothedPrice(String itemId, Inventory inventory) {
