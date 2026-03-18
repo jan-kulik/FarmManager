@@ -12,8 +12,8 @@ import java.util.*;
  */
 public class Market {
 
-    // Maximale Abweichung vom Basispreis (50 %)
-    private static final double MAX_DEVIATION = 0.50;
+    // Maximale Abweichung vom Basispreis (65 %)
+    private static final double MAX_DEVIATION = 0.65;
 
     // Wie stark Kauf/Verkauf den demandFactor verschiebt
     private static final double DEMAND_SHIFT_PER_ITEM = 0.02;
