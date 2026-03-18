@@ -101,6 +101,14 @@ public class AnimalService {
         animals.sort(Comparator.comparingInt(Animal::getId));
     }
 
+    private String getMeatItemId(Animal animal) {
+        if (animal instanceof Cow)     return "beef";
+        if (animal instanceof Chicken) return "chicken_meat";
+        if (animal instanceof Pig)     return "pork";
+        if (animal instanceof Sheep)   return "lamb";
+        return null;
+    }
+
     // === Tier-Menü === \\
 
     private static final int PAGE_SIZE = 15;
@@ -246,12 +254,45 @@ public class AnimalService {
                     System.out.println("Umbenannt zu: " + animal.getName());
                 }
             } else if (input.equals("3")) {
+            String meatId = getMeatItemId(animal);
+            if (meatId != null) {
+                System.out.println("Tier schlachten? (Fleisch wird ins Lager hinzugefugt)");
+                System.out.println("Ja oder Nein?");
+                if (sc.nextLine().trim().equalsIgnoreCase("ja")) {
+                    System.out.print("Erhaltene Fleischmenge (kg): ");
+                    int meatAmount = 0;
+                    try {
+                        meatAmount = Integer.parseInt(sc.nextLine().trim());
+                    } catch (NumberFormatException e) {
+                        System.out.println("Ungültige Menge – kein Fleisch eingebucht.");
+                    }
+                    if (meatAmount > 0) {
+                        if (!inventory.itemExists(meatId)) {
+                            inventory.createItem(meatId, 1000);
+                        }
+                        boolean added = inventory.addItem(meatId, meatAmount);
+                        if (added) {
+                            repo.save(inventory);
+                            System.out.println("+" + meatAmount + " kg "
+                                    + inventory.getDisplayName(meatId) + " ins Lager.");
+                        } else {
+                            System.out.println("Fleisch konnte nicht hinzugefugt werden (Lager voll?).");
+                        }
+                    }
+                    deleteById(animal.getId());
+                    System.out.println(animal.getName() + " wurde geschlachtet und entfernt.");
+                    return;
+                }
+                System.out.println("Abgebrochen.");
+            } else {
                 System.out.println("Wirklich löschen? Ja oder Nein?");
                 if (sc.nextLine().trim().equalsIgnoreCase("ja")) {
                     deleteById(animal.getId());
                     System.out.println("Tier entfernt.");
                     return;
                 }
+                System.out.println("Löschen abgebrochen.");
+            }
                 System.out.println("Löschen abgebrochen.");
             } else if (input.equals("4") && animal instanceof Sheep) {
                 Sheep sheep = (Sheep) animal;
