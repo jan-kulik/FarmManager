@@ -9,6 +9,7 @@ leather,Leder,ANIMAL_PRODUCT,4.00,Stk
 fur,Fell,ANIMAL_PRODUCT,3.50,Stk
 honey,Honig,ANIMAL_PRODUCT,12.00,Glas
 beeswax,Bienenwachs,ANIMAL_PRODUCT,8.00,kg
+lamb,Lammfleisch,ANIMAL_PRODUCT,12.00,kg
 
 wheat,Weizen,CROP,0.22,Stk
 corn,Mais,CROP,0.19,Stk
