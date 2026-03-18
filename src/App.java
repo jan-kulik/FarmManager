@@ -47,6 +47,8 @@ public class App {
         MarketRepository marketRepo = new MarketRepository("market.csv");
         Market market = new Market(marketRepo, catalog);
 
+        FarmShop farmShop = new FarmShop(catalog);
+
         // === Menüs === \\
 
         Menu mainMenu = Menu.main("Hauptmenü", sc);
@@ -74,7 +76,9 @@ public class App {
 
         mainMenu.add(4, "Felder & Ackerbau", () -> crops.openBrowser(sc, inventory, repo));
 
-        mainMenu.add(5, "Tag beenden", () -> {
+        mainMenu.add(5, "Hofladen", () -> farmShop.openMenu(sc, inventory, balance, repo));
+
+        mainMenu.add(6, "Tag beenden", () -> {
             int day = dataStore.getInt("currentDay", 1);
 
             System.out.println("=== Tagesabschluss – Tag " + day + " ===");
@@ -99,6 +103,22 @@ public class App {
             market.endOfDay(inventory);
             System.out.println("Marktpreise wurden aktualisiert.");
             System.out.println("Der Tiershop hat neues Angebot.");
+
+            // Hofladen-Verkäufe berechnen
+            List<FarmShop.SaleResult> shopSales = farmShop.endOfDay(inventory, balance);
+            System.out.println("=== Hofladen-Verkäufe heute ===");
+            boolean anyShopSales = false;
+            for (FarmShop.SaleResult r : shopSales) {
+                if (r.reason != null) {
+                    System.out.println("- " + r.displayName + ": " + r.reason);
+                } else {
+                    System.out.println("- " + r.displayName + ": " + r.unitsSold + " verkauft  +" + String.format("%.2f", r.revenue) + " €");
+                    anyShopSales = true;
+                }
+            }
+            if (shopSales.isEmpty()) {
+                System.out.println("Kein Angebot im Hofladen.");
+            }
 
             // Lager speichern
             repo.save(inventory);
