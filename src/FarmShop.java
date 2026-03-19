@@ -3,15 +3,16 @@ import java.util.*;
 /**
  * Hofladen: Der Farmer kann eigene Produkte zu selbst gewählten Preisen anbieten.
  * Beim Tagesabschluss (endOfDay) wird berechnet, wie viele Kunden kaufen.
+ *
  * Preislogik:
  *   - ratio = farmerPrice / basePrice
- *   - ratio <= 1.0  → hohe Nachfrage (bis zu MAX_CUSTOMERS Kunden)
- *   - ratio > 1.0   → Nachfrage sinkt linear
- *   - ratio >= 5.0  → niemand kauft mehr
+ *   - ratio <= 1.0  -> hohe Nachfrage (bis zu MAX_CUSTOMERS Kunden)
+ *   - ratio > 1.0   -> Nachfrage sinkt linear
+ *   - ratio >= MAX_PRICE_RATIO -> niemand kauft mehr
  */
 public class FarmShop {
 
-    // Artikel die nicht im Hofladen angeboten werden können
+    // Artikel die nicht im Hofladen angeboten werden koennen (z.B. Rohstoffe, Futter)
     private static final Set<String> BLACKLIST = new HashSet<>(Arrays.asList(
             "slurry", "water", "diesel", "wheat_seeds", "corn_seeds",
             "barley_seeds", "rapeseed_seeds", "fertilizer", "biogas",
@@ -22,33 +23,34 @@ public class FarmShop {
     // Maximale Kundenanzahl pro Artikel pro Tag bei optimalem Preis
     private static final int MAX_CUSTOMERS = 17;
 
-    // Ab 6,7 * Basispreis kauft niemand mehr
+    // Ab diesem Vielfachen des Basispreises kauft niemand mehr
     private static final double MAX_PRICE_RATIO = 6.7;
 
+    // Ein einzelnes Angebot im Hofladen
     public static class ShopEntry {
         private final String itemId;
         private double farmerPrice;
         private boolean active;
 
         public ShopEntry(String itemId, double farmerPrice) {
-            this.itemId = itemId;
+            this.itemId      = itemId;
             this.farmerPrice = farmerPrice;
-            this.active = true;
+            this.active      = true;
         }
 
-        public String getItemId()        { return itemId; }
-        public double getFarmerPrice()   { return farmerPrice; }
-        public boolean isActive()        { return active; }
+        public String  getItemId()      { return itemId; }
+        public double  getFarmerPrice() { return farmerPrice; }
+        public boolean isActive()       { return active; }
 
         public void setFarmerPrice(double price) { if (price > 0) this.farmerPrice = price; }
         public void setActive(boolean active)    { this.active = active; }
     }
 
-    // Ergebnis eines Tagesabschlusses für die Anzeige
+    // Ergebnis eines Tagesabschlusses
     public static class SaleResult {
         public final String itemId;
         public final String displayName;
-        public final int unitsSold;
+        public final int    unitsSold;
         public final double revenue;
         public final String reason; // null = normaler Verkauf, sonst Grund warum nichts verkauft
 
@@ -62,14 +64,18 @@ public class FarmShop {
     }
 
     private final Map<String, ShopEntry> entries = new LinkedHashMap<>();
-    private final ItemCatalog catalog;
-    private final Random random = new Random();
+    private final ItemCatalog            catalog;
+    private final FarmShopRepository     repository;
+    private final Random                 random = new Random();
 
-    public FarmShop(ItemCatalog catalog) {
-        this.catalog = catalog;
+    public FarmShop(ItemCatalog catalog, FarmShopRepository repository) {
+        this.catalog    = catalog;
+        this.repository = repository;
+        // Gespeicherte Angebote beim Start laden
+        this.repository.loadOrCreate(this.entries, catalog);
     }
 
-    // Gibt true zurück wenn der Artikel im Hofladen angeboten werden darf
+    /** Gibt true zurueck wenn der Artikel im Hofladen angeboten werden darf. */
     public boolean isAllowed(String itemId) {
         if (itemId == null) return false;
         if (BLACKLIST.contains(itemId)) return false;
@@ -80,17 +86,21 @@ public class FarmShop {
         if (!isAllowed(itemId)) return false;
         if (price <= 0) return false;
         entries.put(itemId, new ShopEntry(itemId, price));
+        repository.save(entries);
         return true;
     }
 
     public boolean removeEntry(String itemId) {
-        return entries.remove(itemId) != null;
+        boolean removed = entries.remove(itemId) != null;
+        if (removed) repository.save(entries);
+        return removed;
     }
 
     public boolean setPrice(String itemId, double price) {
         ShopEntry e = entries.get(itemId);
         if (e == null || price <= 0) return false;
         e.setFarmerPrice(price);
+        repository.save(entries);
         return true;
     }
 
@@ -98,16 +108,18 @@ public class FarmShop {
         return entries;
     }
 
-    //Tagesabschluss: Berechnet Kundenverkäufe für alle aktiven Angebote.
-    // Zieht verkaufte Waren aus dem Lager, zahlt Gewinn auf Konto ein.
+    /**
+     * Tagesabschluss: Berechnet Kundenverkaeufe fuer alle aktiven Angebote.
+     * Zieht verkaufte Waren aus dem Lager, zahlt Einnahmen auf das Konto ein.
+     */
     public List<SaleResult> endOfDay(Inventory inventory, Balance balance) {
         List<SaleResult> results = new ArrayList<>();
 
         for (ShopEntry entry : entries.values()) {
             if (!entry.isActive()) continue;
 
-            String itemId     = entry.getItemId();
-            String name       = inventory.getDisplayName(itemId);
+            String itemId      = entry.getItemId();
+            String name        = inventory.getDisplayName(itemId);
             double farmerPrice = entry.getFarmerPrice();
 
             ItemDefinition def = catalog.get(itemId);
@@ -116,28 +128,28 @@ public class FarmShop {
             double basePrice = def.getBasePrice();
             double ratio     = farmerPrice / basePrice;
 
-            // Preis zu hoch = niemand kauft
+            // Preis zu hoch: niemand kauft
             if (ratio >= MAX_PRICE_RATIO) {
                 results.add(new SaleResult(itemId, name, 0, 0,
-                        "Preis zu hoch (>" + (int)(MAX_PRICE_RATIO) + "x Basispreis) – keine Kunden"));
+                        "Preis zu hoch (>" + (int)(MAX_PRICE_RATIO) + "x Basispreis) - keine Kunden"));
                 continue;
             }
 
-            // Kein Bestand
+            // Kein Bestand vorhanden
             int stock = inventory.getAmount(itemId);
             if (stock <= 0) {
                 results.add(new SaleResult(itemId, name, 0, 0, "Nicht auf Lager"));
                 continue;
             }
 
-            // Kaufwahrscheinlichkeit berechnen: linear von 1.0 (ratio=0) bis 0.0 (ratio=MAX)
+            // Kaufwahrscheinlichkeit: linear von 1.0 (ratio=0) bis 0.0 (ratio=MAX)
             double buyChance = Math.max(0.0, 1.0 - (ratio / MAX_PRICE_RATIO));
 
-            // Anzahl potentieller Kunden sinkt auch mit steigendem Preis
+            // Potenzielle Kundenzahl sinkt ebenfalls mit steigendem Preis
             int potentialCustomers = (int) Math.round(MAX_CUSTOMERS * buyChance);
             if (potentialCustomers < 1 && ratio < MAX_PRICE_RATIO) potentialCustomers = 1;
 
-            // Jeder Kunde würfelt ob er kauft
+            // Jeder Kunde wuerfelt ob er kauft
             int unitsSold = 0;
             for (int i = 0; i < potentialCustomers; i++) {
                 if (random.nextDouble() < buyChance) {
@@ -145,7 +157,7 @@ public class FarmShop {
                 }
             }
 
-            // Maximal so viel wie auf Lager
+            // Maximal so viel wie im Lager vorhanden
             unitsSold = Math.min(unitsSold, stock);
 
             if (unitsSold == 0) {
@@ -153,7 +165,7 @@ public class FarmShop {
                 continue;
             }
 
-            // Aus Lager nehmen und Geld einzahlen
+            // Lager reduzieren und Einnahmen verbuchen
             inventory.removeItem(itemId, unitsSold);
             double revenue = unitsSold * farmerPrice;
             balance.deposit(revenue);
@@ -161,15 +173,17 @@ public class FarmShop {
             results.add(new SaleResult(itemId, name, unitsSold, revenue, null));
         }
 
+        // Stand nach Tagesabschluss speichern
+        repository.save(entries);
         return results;
     }
 
-    // === Menü ===
+    // === Menue ===
 
     public void openMenu(Scanner sc, Inventory inventory, Balance balance, InventoryRepository repo) {
         while (true) {
             System.out.println("=== Hofladen ===");
-            System.out.println("Kontostand: " + String.format("%.2f", balance.getBalance()) + " €");
+            System.out.println("Kontostand: " + String.format("%.2f", balance.getBalance()) + " EUR");
             System.out.println();
 
             if (entries.isEmpty()) {
@@ -182,20 +196,21 @@ public class FarmShop {
                 int i = 1;
                 for (ShopEntry e : entries.values()) {
                     String name  = inventory.getDisplayName(e.getItemId());
-                    int stock    = inventory.getAmount(e.getItemId());
+                    int    stock = inventory.getAmount(e.getItemId());
                     double base  = getBasePrice(e.getItemId());
                     double ratio = e.getFarmerPrice() / base;
+                    // Warnung wenn Preis zu hoch oder sehr unattraktiv
                     String warn  = ratio >= MAX_PRICE_RATIO ? " !!ZU HOCH!!" : ratio > 2.0 ? " (wenig Nachfrage)" : "";
-                    System.out.printf("  %2d) %-24s  %5d     %7.2f €   %7.2f €%s%n",
+                    System.out.printf("  %2d) %-24s  %5d     %7.2f EUR   %7.2f EUR%s%n",
                             i++, name, stock, e.getFarmerPrice(), base, warn);
                 }
             }
 
             System.out.println();
-            System.out.println("1) Artikel hinzufügen");
-            System.out.println("2) Preis ändern");
+            System.out.println("1) Artikel hinzufuegen");
+            System.out.println("2) Preis aendern");
             System.out.println("3) Artikel entfernen");
-            System.out.println("0) Zurück");
+            System.out.println("0) Zurueck");
             System.out.print("Auswahl: ");
             String input = sc.nextLine().trim();
 
@@ -203,12 +218,12 @@ public class FarmShop {
             else if (input.equals("1")) openAddMenu(sc, inventory);
             else if (input.equals("2")) openPriceMenu(sc, inventory);
             else if (input.equals("3")) openRemoveMenu(sc, inventory);
-            else System.out.println("Ungültige Auswahl.");
+            else System.out.println("Ungueltige Auswahl.");
         }
     }
 
     private void openAddMenu(Scanner sc, Inventory inventory) {
-        // Alle Artikel die im Lager sind, erlaubt sind und noch nicht im Angebot
+        // Nur Artikel anzeigen die erlaubt und noch nicht im Angebot sind
         List<String> available = new ArrayList<>();
         for (String id : inventory.getItemIdsSorted()) {
             if (isAllowed(id) && !entries.containsKey(id)) {
@@ -217,15 +232,15 @@ public class FarmShop {
         }
 
         if (available.isEmpty()) {
-            System.out.println("Keine weiteren Artikel verfügbar.");
+            System.out.println("Keine weiteren Artikel verfuegbar.");
             return;
         }
 
-        System.out.println("=== Artikel hinzufügen ===");
+        System.out.println("=== Artikel hinzufuegen ===");
         for (int i = 0; i < available.size(); i++) {
             String id   = available.get(i);
             double base = getBasePrice(id);
-            System.out.printf("  %2d) %-24s  Basispreis: %.2f €%n",
+            System.out.printf("  %2d) %-24s  Basispreis: %.2f EUR%n",
                     i + 1, inventory.getDisplayName(id), base);
         }
 
@@ -233,26 +248,27 @@ public class FarmShop {
         System.out.print("Auswahl: ");
         int choice = readInt(sc);
         if (choice == 0) return;
-        if (choice < 1 || choice > available.size()) { System.out.println("Ungültige Auswahl."); return; }
+        if (choice < 1 || choice > available.size()) { System.out.println("Ungueltige Auswahl."); return; }
 
-        String chosen   = available.get(choice - 1);
-        double base     = getBasePrice(chosen);
-        System.out.printf("Dein Verkaufspreis (Basispreis: %.2f €): ", base);
+        String chosen = available.get(choice - 1);
+        double base   = getBasePrice(chosen);
+        System.out.printf("Dein Verkaufspreis (Basispreis: %.2f EUR): ", base);
         double price = readDouble(sc);
-        if (price <= 0) { System.out.println("Ungültiger Preis."); return; }
+        if (price <= 0) { System.out.println("Ungueltiger Preis."); return; }
 
         addEntry(chosen, price);
-        System.out.println(inventory.getDisplayName(chosen) + " zum Preis von " + String.format("%.2f", price) + " € im Hofladen eingestellt.");
+        System.out.println(inventory.getDisplayName(chosen) + " zum Preis von "
+                + String.format("%.2f", price) + " EUR im Hofladen eingestellt.");
     }
 
     private void openPriceMenu(Scanner sc, Inventory inventory) {
         if (entries.isEmpty()) { System.out.println("Keine Artikel im Angebot."); return; }
 
         List<ShopEntry> list = new ArrayList<>(entries.values());
-        System.out.println("=== Preis ändern ===");
+        System.out.println("=== Preis aendern ===");
         for (int i = 0; i < list.size(); i++) {
             ShopEntry e = list.get(i);
-            System.out.printf("  %2d) %-24s  aktuell: %.2f €%n",
+            System.out.printf("  %2d) %-24s  aktuell: %.2f EUR%n",
                     i + 1, inventory.getDisplayName(e.getItemId()), e.getFarmerPrice());
         }
 
@@ -260,16 +276,16 @@ public class FarmShop {
         System.out.print("Auswahl: ");
         int choice = readInt(sc);
         if (choice == 0) return;
-        if (choice < 1 || choice > list.size()) { System.out.println("Ungültige Auswahl."); return; }
+        if (choice < 1 || choice > list.size()) { System.out.println("Ungueltige Auswahl."); return; }
 
         ShopEntry chosen = list.get(choice - 1);
         double base = getBasePrice(chosen.getItemId());
-        System.out.printf("Neuer Preis für %s (Basispreis: %.2f €): ",
+        System.out.printf("Neuer Preis fuer %s (Basispreis: %.2f EUR): ",
                 inventory.getDisplayName(chosen.getItemId()), base);
         double price = readDouble(sc);
-        if (price <= 0) { System.out.println("Ungültiger Preis."); return; }
+        if (price <= 0) { System.out.println("Ungueltiger Preis."); return; }
 
-        chosen.setFarmerPrice(price);
+        setPrice(chosen.getItemId(), price);
         System.out.println("Preis aktualisiert.");
     }
 
@@ -287,7 +303,7 @@ public class FarmShop {
         System.out.print("Auswahl: ");
         int choice = readInt(sc);
         if (choice == 0) return;
-        if (choice < 1 || choice > list.size()) { System.out.println("Ungültige Auswahl."); return; }
+        if (choice < 1 || choice > list.size()) { System.out.println("Ungueltige Auswahl."); return; }
 
         String removed = list.get(choice - 1).getItemId();
         removeEntry(removed);
@@ -296,6 +312,7 @@ public class FarmShop {
 
     // Hilfsmethoden
 
+    // Gibt den Basispreis zurueck
     private double getBasePrice(String itemId) {
         ItemDefinition def = catalog.get(itemId);
         return (def != null) ? def.getBasePrice() : 1.0;
