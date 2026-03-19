@@ -47,7 +47,8 @@ public class App {
         MarketRepository marketRepo = new MarketRepository("market.csv");
         Market market = new Market(marketRepo, catalog);
 
-        FarmShop farmShop = new FarmShop(catalog);
+        FarmShopRepository farmShopRepo = new FarmShopRepository("farmshop.csv");
+        FarmShop farmShop = new FarmShop(catalog, farmShopRepo);
 
         // === Menüs === \\
 
