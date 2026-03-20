@@ -1,4 +1,4 @@
-// Beschreibung eines einzelnen Items mit ID, Name, Kategorie, Basispreis und Einheit.
+// Ein Item aus dem Katalog, hat ID, Name, Kategorie, Basispreis und Einheit.
 public class ItemDefinition {
     private final String itemId;
     private final String displayName;

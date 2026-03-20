@@ -1,7 +1,7 @@
-// Abstrakte Basisklasse fuer alle Tiere auf dem Hof. Jedes Tier hat
-// eine ID, einen Namen, Alter in Tagen und einen Hungerwert.
-// Die endOfDay Methode kuemmert sich um Produktion und Hungerverlust,
-// wird einmal pro Tag aufgerufen.
+// Basisklasse fuer alle Tiere. Jedes Tier hat
+// eine ID, name, Alter in Tagen und Hungerwert.
+// endOfDay kuemmert sich um Produktion und Hungerverlust,
+// wird einmal pro Tag aufgerufen
 public abstract class Animal {
 
     private final int id;

@@ -1,8 +1,8 @@
 import java.io.*;
 import java.util.*;
 
-// Kummert sich ums Laden und Speichern der Tiere als CSV-Datei.
-// Neue IDs werden ueber den DataStore verwaltet damit keine Doppel-IDs entstehen.
+// Laedt und speichert Tiere als CSV.
+// IDs werden ueber DataStore verwaltet damit keine doppelten entstehen.
 public class AnimalRepository {
 
     private final String filePath;

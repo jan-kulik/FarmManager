@@ -84,7 +84,7 @@ public class App {
         mainMenu.add(6, "Tag beenden", () -> {
             int day = dataStore.getInt("currentDay", 1);
 
-            System.out.println("=== Tagesabschluss – Tag " + day + " ===");
+            System.out.println("=== Tagesabschluss Tag " + day + " ===");
             System.out.println(" ");
 
             // Tiere produzieren

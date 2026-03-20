@@ -33,7 +33,7 @@ public class Sheep extends Animal {
         return 40;
     }
 
-    // Automatische Produktion deaktiviert – Schafe werden manuell geschoren.
+    // automatische Produktion deaktiviert, Schafe werden manuell geschoren
     @Override
     public String getProductItemId() {
         return "wool";

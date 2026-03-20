@@ -267,7 +267,7 @@ public class AnimalService {
                     try {
                         meatAmount = Integer.parseInt(sc.nextLine().trim());
                     } catch (NumberFormatException e) {
-                        System.out.println("Ungültige Menge – kein Fleisch eingebucht.");
+                        System.out.println("Ungültige Menge, kein Fleisch eingebucht.");
                     }
                     if (meatAmount > 0) {
                         if (!inventory.itemExists(meatId)) {
@@ -300,7 +300,7 @@ public class AnimalService {
             } else if (input.equals("4") && animal instanceof Sheep) {
                 Sheep sheep = (Sheep) animal;
                 if (!sheep.canBeSheared()) {
-                    System.out.println("Noch nicht scherbereit – noch "
+                    System.out.println("Noch nicht scherbereit, noch "
                             + sheep.getDaysUntilShearing() + " Tage warten.");
                 } else if (sheep.getHunger() < sheep.getMinHungerToProduce()) {
                     System.out.println("Das Schaf ist zu hungrig (Hunger < 40). Erst füttern!");
@@ -314,7 +314,7 @@ public class AnimalService {
                         System.out.println(animal.getName() + " wurde geschoren!  +"
                                 + erhalten + "x Wolle ins Lager.");
                     } else {
-                        System.out.println("Scheren fehlgeschlagen – Lager voll?");
+                        System.out.println("Scheren fehlgeschlagen, Lager voll?");
                     }
                 }
             } else {

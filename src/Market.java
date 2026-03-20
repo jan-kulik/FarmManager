@@ -1,9 +1,8 @@
 import java.util.*;
 
-// Markt zum Kaufen und Verkaufen von Waren. Preise aendern sich taeglich
-// basierend auf Angebot und Nachfrage, werden aber geglaettet damit sie
-// nicht zu sehr springen. Ausserdem gibt es einen Tiershop mit
-// taeglich neuem Angebot.
+// Kaufen und Verkaufen von Waren. Preise aendern sich taeglich je nach
+// Angebot und Nachfrage, werden geglaettet damit sie nicht zu sehr springen.
+// Tiershop hat taeglich neues Angebot.
 public class Market {
 
     // Maximale Abweichung vom Basispreis (65 %)
@@ -12,7 +11,7 @@ public class Market {
     // Wie stark Kauf/Verkauf den demandFactor verschiebt
     private static final double DEMAND_SHIFT_PER_ITEM = 0.02;
 
-    // Wie schnell der smooth Preis dem Basispreis folgt (0–1)
+    // Wie schnell der smooth Preis dem Basispreis folgt (0-1)
     private static final double SMOOTH_FACTOR = 0.30;
 
     // Standard-Kapazität, wenn ein Item beim Kauf neu angelegt wird
@@ -66,8 +65,6 @@ public class Market {
         generateAnimalOffer();
     }
 
-    // Preisberechnung
-
     public double getBuyPrice(String itemId, Inventory inventory) {
         return getSmoothedPrice(itemId, inventory) * 1.07;
     }
@@ -80,8 +77,6 @@ public class Market {
         MarketEntry entry = getOrCreate(itemId);
         return entry.getSmoothedPrice();
     }
-
-    // Kaufen / Verkaufen (Waren)
 
     public double buyFromMarket(String itemId, int amount,
                                 Inventory inventory, Balance balance) {
@@ -136,8 +131,6 @@ public class Market {
         return total;
     }
 
-    // Tagesabschluss
-
     public void endOfDay(Inventory inventory) {
         List<ItemDefinition> allItems = catalog.getAllSorted();
 
@@ -169,8 +162,6 @@ public class Market {
         generateAnimalOffer();         // Tierangebot täglich neu generieren
     }
 
-    // Tiershop – Angebot generieren
-
     // generiert 3 bis 6 zufaellige Tiere mit leicht schwankenden Preisen
     private void generateAnimalOffer() {
         animalOffer.clear();
@@ -187,8 +178,6 @@ public class Market {
             animalOffer.add(new ShopAnimalEntry(type, name, price));
         }
     }
-
-    // Menü
 
     public void openMenu(Scanner sc, Inventory inventory, Balance balance,
                          InventoryRepository invRepo, AnimalService animalService) {
@@ -214,8 +203,6 @@ public class Market {
             else System.out.println("Ungültige Auswahl.");
         }
     }
-
-    // Tiershop-Menü
 
     private void openAnimalShopMenu(Scanner sc, Balance balance, AnimalService animalService) {
         while (true) {
@@ -290,8 +277,6 @@ public class Market {
             System.out.println();
         }
     }
-
-    // Warenmenüs
 
     private void openSellMenu(Scanner sc, Inventory inventory, Balance balance,
                               InventoryRepository invRepo) {
@@ -422,8 +407,6 @@ public class Market {
         }
         System.out.println();
     }
-
-    // Hilfsmethoden
 
     private MarketEntry getOrCreate(String itemId) {
         if (!entries.containsKey(itemId)) {
