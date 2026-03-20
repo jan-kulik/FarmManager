@@ -1,3 +1,4 @@
+// Einzelner Menueeintrag mit einem Anzeigetext und einer Aktion.
 public class MenuItem {
 
     private final String text;

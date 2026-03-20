@@ -1,5 +1,7 @@
 import java.util.Random;
 
+// Schaf - wird manuell geschoren statt automatisch zu produzieren.
+// productionCounterDays aus Animal wird als "Tage seit letzter Schur" wiederverwendet.
 public class Sheep extends Animal {
 
     // productionCounterDays aus Animal wird als "daysSinceShearing" wiederverwendet.
@@ -61,7 +63,7 @@ public class Sheep extends Animal {
         }
     }
 
-    /** productionCounterDays wird hier als Tage-seit-Schur verwendet. */
+    // gibt true wenn das Schaf lange gnug nicht geschoren wurde (182 Tage)
     public boolean canBeSheared() {
         return getProductionCounterDays() >= SHEARING_INTERVAL;
     }
@@ -70,10 +72,8 @@ public class Sheep extends Animal {
         return Math.max(0, SHEARING_INTERVAL - getProductionCounterDays());
     }
 
-    /**
-     * Schert das Schaf manuell. Legt 2–5 Wolle ins Lager.
-     * Setzt productionCounterDays auf 0 zurück.
-     */
+    // Schaf scheren, gibt 2 bis 5 Wolle ins Lager.
+    // Klappt nur wenn scherbereit und nicht zu hungrig.
     public boolean shear(Inventory inventory) {
         if (!canBeSheared()) return false;
         if (getHunger() < getMinHungerToProduce()) return false;

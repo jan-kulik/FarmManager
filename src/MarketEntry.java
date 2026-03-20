@@ -1,3 +1,5 @@
+// Marktdaten fuer ein einzelnes Item. Speichert den demandFactor
+// und den geglaetteten Preis, wird taeglich neu berechnet.
 public class MarketEntry {
 
     private final String itemId;

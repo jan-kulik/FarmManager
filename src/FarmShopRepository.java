@@ -1,10 +1,7 @@
 import java.io.*;
 import java.util.*;
 
-/**
- * Lädt und speichert die Hofladen-Angebote in einer CSV-Datei.
- * Format: itemId,farmerPrice,active
- */
+// Laedt und speichert die Hofladen-Eintraege als CSV-Datei.
 public class FarmShopRepository {
 
     private final String filePath;

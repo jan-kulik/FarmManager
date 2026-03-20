@@ -2,6 +2,9 @@ import java.io.*;
 import java.util.*;
 import java.nio.file.*;
 
+// Simpler key=value Datenspeicher der in eine Textdatei schreibt.
+// Schreibt erst in eine .tmp-Datei und benennt sie dann um damit
+// bei einem Absturz keine kaputten Dateien entstehen koennen.
 public class DataStore {
     private final String filePath;
     private final Map<String,String> data = new LinkedHashMap<>();
@@ -62,10 +65,11 @@ public class DataStore {
     private void load(){
         Path path = Paths.get(filePath);
         if(!Files.exists(path)) {
-            save();
+            save(); // Datei neu anlegen wenn noch nicht vorhanden
             return;
         }
 
+        // Format: key=value, Kommentare mit # werden ignoriert
         try ( BufferedReader reader = Files.newBufferedReader(path)) {
             String line;
             while ((line = reader.readLine()) != null) {
@@ -82,6 +86,7 @@ public class DataStore {
     }
 
     private void save() {
+        // erstmal in .tmp schreiben, dann umbenennen – so geht nix verloren bei Absturz
         Path temp = Paths.get(filePath + ".tmp");
         Path target = Paths.get(filePath);
 
@@ -97,6 +102,7 @@ public class DataStore {
             Files.move(temp, target, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
         } catch (IOException e) {
             try{
+                // atomic geht nicht auf allen systemen, normaler move als fallback
                 Files.move(temp, target, StandardCopyOption.REPLACE_EXISTING);
             } catch (IOException ignored) {
             }

@@ -3,6 +3,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Scanner;
 
+// Verwaltet alle Tiere auf dem Hof. Laedt beim Start aus der Datei,
+// bietet Methoden zum Erstellen, Loeschen und Fuettern und stellt
+// das Tier-Browsermenue bereit.
 public class AnimalService {
 
     private final AnimalRepository repository;

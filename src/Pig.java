@@ -1,3 +1,5 @@
+// Schwein - erzeugt alle 2 Tage Guelle wenn der Hunger hoch gnug ist.
+// Hunger sinkt etwas langsamer als bei anderen Tieren.
 public class Pig extends Animal {
 
     public Pig(int id, String name) {

@@ -1,8 +1,5 @@
-/**
- * Bienen werden als Gruppe verwaltet und benötigen kein Futter. Sie produzieren alle 30 Tage Honig.
- * Die Menge des produzierten Honigs hängt von der Größe der Kolonie ab.
- * Honig wird in Gläsern gespeichert.
- */
+// Bienenvoelker, produzieren einmal im Monat Honig.
+// Kein Futter noetig, Menge haengt von der Volksgroesse ab.
 public class Bee extends Animal {
 
     private int colonySize;

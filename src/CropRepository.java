@@ -1,6 +1,8 @@
 import java.io.*;
 import java.util.*;
 
+// Laedt und speichert alle Felder als CSV-Datei.
+// Feld-IDs werden wie Tier-IDs ueber den DataStore verwaltet.
 public class CropRepository {
 
     private final String filePath;

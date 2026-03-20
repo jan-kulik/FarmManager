@@ -1,6 +1,8 @@
 import java.io.*;
 import java.util.*;
 
+// Das Lager des Hofes. Speichert wieviel von welchem Artikel da ist,
+// mit Limits pro Artikel und optional einem Gesamtlimit.
 public class Inventory {
     private final Map<String, Integer> items;
     private final Map<String, Integer> itemCaps;
@@ -146,6 +148,7 @@ public class Inventory {
     }
 
 
+    // IDs sind immer lowercase, nur a-z, 0-9, _ und - erlaubt
     private String normalizeId(String itemId) {
         if (itemId == null) return null;
 

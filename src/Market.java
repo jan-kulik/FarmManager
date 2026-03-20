@@ -1,15 +1,9 @@
 import java.util.*;
 
-/**
- * Preisberechnung:
- *   1) Rohpreis = Basispreis * demandFactor * angebotsFaktor * 7% (Kaufen) 9 (Verkaufen) MwSt
- *   2) angebotsFaktor: sinkt wenn Lager voll ist, steigt wenn Lager leer ist
- *   3) demandFactor: steigt beim Verkaufen (+0.05 pro Item), sinkt beim Kaufen (-0.05)
- *   4) Preisglätte: smoothedPrice bewegt sich langsam Richtung Rohpreis (30% je Tag)
- *   5) Preis ist auf ±50% des Basispreises begrenzt
- * beim Kauf: Item wird ggf automatisch im Lager angelegt (Standardkapazität 1000).
- * Tiershop: Täglich wechselndes Angebot an zufälligen Tieren zum Kauf.
- */
+// Markt zum Kaufen und Verkaufen von Waren. Preise aendern sich taeglich
+// basierend auf Angebot und Nachfrage, werden aber geglaettet damit sie
+// nicht zu sehr springen. Ausserdem gibt es einen Tiershop mit
+// taeglich neuem Angebot.
 public class Market {
 
     // Maximale Abweichung vom Basispreis (65 %)
@@ -177,10 +171,7 @@ public class Market {
 
     // Tiershop – Angebot generieren
 
-    /**
-     * Generiert ein neues zufälliges Tierangebot (3–6 Tiere).
-     * Preise schwanken ±20% um den Basispreis.
-     */
+    // generiert 3 bis 6 zufaellige Tiere mit leicht schwankenden Preisen
     private void generateAnimalOffer() {
         animalOffer.clear();
         int count = 3 + random.nextInt(4); // 3 bis 6 Tiere

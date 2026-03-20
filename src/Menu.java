@@ -3,6 +3,8 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.function.Supplier;
 
+// Generisches Konsolenmenu. Eintraege werden mit Nummern navigiert.
+// Bei 0 geht es zurueck, oder das Programm schliesst sich wenn isMainMenu true ist.
 public class Menu {
 
     private final String title;
@@ -10,6 +12,7 @@ public class Menu {
     private final boolean isMainMenu;
     private Supplier<String> statusLine;
 
+    // LinkedHashMap damit die Reihenfolge der Einträge erhalten bleibt
     private final Map<Integer, MenuItem> items = new LinkedHashMap<>();
 
     private Menu(String title, Scanner sc, boolean isMainMenu) {
@@ -39,6 +42,7 @@ public class Menu {
             print();
             int choice = readInt("Auswahl: ");
 
+            // 0 = zurück oder beenden je nach Menütyp
             if (choice == 0) {
                 return;
             }

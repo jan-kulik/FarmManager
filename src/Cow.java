@@ -1,3 +1,4 @@
+// Kuh - produziert taeglich Milch solange sie nicht zu hungrig ist.
 public class Cow extends Animal {
 
     public Cow(int id, String name) {
@@ -45,6 +46,7 @@ public class Cow extends Animal {
 
     @Override
     public int getFeedHungerValue(String itemId) {
+        // Silage ist etwas nahrhafter als Heu
         switch (itemId) {
             case "hay": return 30;
             case "silage": return 35;

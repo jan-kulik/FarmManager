@@ -1,6 +1,7 @@
 import java.io.*;
 import java.util.*;
 
+// Laedt und speichert Marktdaten als CSV damit Preise nach einem Neustart gleich bleiben.
 public class MarketRepository {
 
     private final String filePath;

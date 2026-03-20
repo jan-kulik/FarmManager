@@ -1,6 +1,8 @@
 import java.io.*;
 import java.util.*;
 
+// Kummert sich ums Laden und Speichern der Tiere als CSV-Datei.
+// Neue IDs werden ueber den DataStore verwaltet damit keine Doppel-IDs entstehen.
 public class AnimalRepository {
 
     private final String filePath;
@@ -28,6 +30,7 @@ public class AnimalRepository {
                 String t = line.trim();
                 if (t.isEmpty()) continue;
 
+                // Header-Zeile überspringen
                 if (firstLine && t.toLowerCase().startsWith("id,")) {
                     firstLine = false;
                     continue;
@@ -71,6 +74,7 @@ public class AnimalRepository {
         } catch (IOException ignored) {
         }
 
+        // höchste vorhandene ID merken damit neue IDs nicht doppelt vergeben werden
         int maxId = 0;
         for (Animal a : animals) {
             if (a.getId() > maxId) maxId = a.getId();

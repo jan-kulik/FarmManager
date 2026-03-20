@@ -1,6 +1,8 @@
 import java.io.*;
 import java.util.*;
 
+// Enthaelt alle Items die im Spiel existieren (geladen aus items_catalog.csv).
+// Wird nur einmal beim Start eingelesen, danach nur noch gelesen.
 public class ItemCatalog {
 
     private final Map<String, ItemDefinition> definitions = new HashMap<>();

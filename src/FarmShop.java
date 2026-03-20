@@ -1,15 +1,8 @@
 import java.util.*;
 
-/**
- * Hofladen: Der Farmer kann eigene Produkte zu selbst gewählten Preisen anbieten.
- * Beim Tagesabschluss (endOfDay) wird berechnet, wie viele Kunden kaufen.
- *
- * Preislogik:
- *   - ratio = farmerPrice / basePrice
- *   - ratio <= 1.0  -> hohe Nachfrage (bis zu MAX_CUSTOMERS Kunden)
- *   - ratio > 1.0   -> Nachfrage sinkt linear
- *   - ratio >= MAX_PRICE_RATIO -> niemand kauft mehr
- */
+// Hofladen, hier kann der Spieler eigene Produkte zu selbstgewaehlten Preisen verkaufen.
+// Je naeher der Preis am Basispreis liegt desto mehr Kunden kommen.
+// Ab dem ~6.7-fachen Basispreis kauft keiner mehr.
 public class FarmShop {
 
     // Artikel die nicht im Hofladen angeboten werden koennen (z.B. Rohstoffe, Futter)
@@ -75,7 +68,7 @@ public class FarmShop {
         this.repository.loadOrCreate(this.entries, catalog);
     }
 
-    /** Gibt true zurueck wenn der Artikel im Hofladen angeboten werden darf. */
+    // prueft ob ein Artikel ueberhaupt im Hofladen angeboten werden darf
     public boolean isAllowed(String itemId) {
         if (itemId == null) return false;
         if (BLACKLIST.contains(itemId)) return false;
@@ -108,10 +101,8 @@ public class FarmShop {
         return entries;
     }
 
-    /**
-     * Tagesabschluss: Berechnet Kundenverkaeufe fuer alle aktiven Angebote.
-     * Zieht verkaufte Waren aus dem Lager, zahlt Einnahmen auf das Konto ein.
-     */
+    // Tagesabschluss, berechnet fuer jeden Artikel wie viele Kunden kaufen
+    // und schreibt die Einnahmen direkt aufs Konto.
     public List<SaleResult> endOfDay(Inventory inventory, Balance balance) {
         List<SaleResult> results = new ArrayList<>();
 

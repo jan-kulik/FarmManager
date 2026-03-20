@@ -1,6 +1,8 @@
 import java.io.*;
 import java.util.*;
 
+// Laedt und speichert das Inventar als CSV-Datei.
+// Die Gesamtkapazitaet wird zusaetzlich im DataStore gehalten.
 public class InventoryRepository {
 
     private final String inventoryFile;

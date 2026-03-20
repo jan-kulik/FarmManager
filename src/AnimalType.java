@@ -1,3 +1,4 @@
+// Alle unterstuetzten Tierarten
 public enum AnimalType {
     CHICKEN,
     COW,

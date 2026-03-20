@@ -1,6 +1,8 @@
 import java.util.Scanner;
 import java.util.List;
 
+// Hauptklasse der Anwendung. Initialisiert alle Komponenten und
+// baut das gesamte Menue zusammen. Hier laeuft alles zusammen.
 public class App {
 
     public void start() {

@@ -1,5 +1,7 @@
 import java.util.*;
 
+// Verwaltet alle bepflanzten Felder. Felder wachsen taeglich um einen Tag
+// und koennen geerntet werden sobald die noetige Wachstumszeit erreicht ist.
 public class Crops {
 
     public static class CropEntry {

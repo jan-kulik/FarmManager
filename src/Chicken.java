@@ -1,3 +1,4 @@
+// Huhn - legt bei genuegend Hunger taeglich ein Ei.
 public class Chicken extends Animal {
 
     public Chicken(int id, String name) {
