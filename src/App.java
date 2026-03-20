@@ -64,7 +64,7 @@ public class App {
                 System.out.println("Freie Kapazität: " + inventory.getFreeCapacity());
             }
             for (String id : inventory.getItemIdsSorted()) {
-                System.out.println("- " + inventory.getDisplayName(id) + ": " + inventory.getAmount(id) + " / " + inventory.getMaxItemCapacity(id) + inventory.getAmount(id));
+                System.out.println("- " + inventory.getDisplayName(id) + ": " + inventory.getAmount(id) + " / " + inventory.getMaxItemCapacity(id) + inventory.getUnit(id));
             }
             System.out.print("Enter drücken, um zum Menü zurückzukehren.");
             sc.nextLine();
