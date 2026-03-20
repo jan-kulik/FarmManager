@@ -171,11 +171,8 @@ public class Market {
 
             entry.resetDailyCounters();
         }
-
         repository.save(entries);
-
-        // Tierangebot täglich neu generieren
-        generateAnimalOffer();
+        generateAnimalOffer();         // Tierangebot täglich neu generieren
     }
 
     // Tiershop – Angebot generieren
