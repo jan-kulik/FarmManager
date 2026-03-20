@@ -52,7 +52,7 @@ public class App {
         FarmShopRepository farmShopRepo = new FarmShopRepository("farmshop.csv");
         FarmShop farmShop = new FarmShop(catalog, farmShopRepo);
 
-        // === Menüs === \\
+        // Menüs
 
         Menu mainMenu = Menu.main("Hauptmenü", sc);
         Menu settingsAndConfigMenu = Menu.sub("Einstellungen & Konfiguration", sc);
@@ -140,7 +140,7 @@ public class App {
         mainMenu.add(9, "Einstellungen & Konfiguration", settingsAndConfigMenu::open);
 
 
-        // ===  Einstellungen & Konfiguration === \\
+        // Einstellungen & Konfiguration
 
         Menu moneySettingMenu = Menu.sub("Geldkonfiguration", sc);
         Menu inventorySettingsMenu = Menu.sub("Lagerkonfiguration", sc);
@@ -269,7 +269,7 @@ public class App {
     }
 
 
-    // ===  Hilfsfunktionen === \\
+    // Hilfsfunktionen
 
     private int readInt(Scanner sc, String prompt) {
         while (true) {

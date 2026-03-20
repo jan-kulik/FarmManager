@@ -112,7 +112,7 @@ public class AnimalService {
         return null;
     }
 
-    // === Tier-Menü === \\
+    // Tier-Menü
 
     private static final int PAGE_SIZE = 15;
 

@@ -5,6 +5,8 @@ import java.nio.file.*;
 // Simpler key=value Datenspeicher der in eine Textdatei schreibt.
 // Schreibt erst in eine .tmp-Datei und benennt sie dann um damit
 // bei einem Absturz keine kaputten Dateien entstehen koennen.
+
+// !!! Den Speicher mechanismus haben wir von StackOverflow!!! keine ganz eigene Logik!!! Deshalb nicht darauf eingegangeb in der Dokumentation!!!!
 public class DataStore {
     private final String filePath;
     private final Map<String,String> data = new LinkedHashMap<>();
@@ -86,7 +88,7 @@ public class DataStore {
     }
 
     private void save() {
-        // erstmal in .tmp schreiben, dann umbenennen – so geht nix verloren bei Absturz
+        // erstmal in .tmp schreiben, dann umbenennen
         Path temp = Paths.get(filePath + ".tmp");
         Path target = Paths.get(filePath);
 
@@ -102,7 +104,6 @@ public class DataStore {
             Files.move(temp, target, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
         } catch (IOException e) {
             try{
-                // atomic geht nicht auf allen systemen, normaler move als fallback
                 Files.move(temp, target, StandardCopyOption.REPLACE_EXISTING);
             } catch (IOException ignored) {
             }

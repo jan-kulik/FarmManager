@@ -169,7 +169,7 @@ public class FarmShop {
         return results;
     }
 
-    // === Menue ===
+    // Menue
 
     public void openMenu(Scanner sc, Inventory inventory, Balance balance, InventoryRepository repo) {
         while (true) {
